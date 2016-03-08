@@ -4,7 +4,7 @@ alignment-unique.csv: alignment.csv
 	sort $^ | uniq > $@
 
 alignment.csv: ia-oclc-lccn-issn-isbn.csv hathifile.tsv book-aligner.rb
-	./book-aligner.rb ia-oclc-lccn-issn-isbn.csv hathifile.tsv
+	./book-aligner.rb ia-oclc-lccn-issn-isbn.csv hathifile.tsv > $@
 
 hathifile.tsv:
 	curl 'https://www.hathitrust.org/filebrowser/download/142568' | gunzip -c > $@

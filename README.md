@@ -7,11 +7,11 @@ Ultimately, I want to be able to mash in a HT/IA/GB/etc. URL or other identifier
 ## Requirements
 
 * `make`
-* `wget`
+* `curl`
 * Ruby
 
 ## Usage
 
 The default `make` target should download and run everything.
 
-**WARNING**: this currently produces about 1.7GB of output.
+**WARNING**: this currently produces about 4.3GB of output.

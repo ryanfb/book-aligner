@@ -11,6 +11,7 @@ internet_archive, hathifile = ARGV
 identifiers = {}
 ia_volumes = {}
 ia_published = {}
+ht_ia_match_scores = {}
 
 def check_volumes(ht_vol, ia_vol)
   if ht_vol == ia_vol
@@ -39,7 +40,7 @@ def check_published(ht_pub, ia_pub)
   return ht_pub == ia_pub
 end
 
-def check_identifiers(identifiers, ia_volumes, ia_published, volume_identifier, hathi_volume, hathi_published, hathi_identifiers, identifier_key)
+def check_identifiers(ht_ia_match_scores, identifiers, ia_volumes, ia_published, volume_identifier, hathi_volume, hathi_published, hathi_identifiers, identifier_key)
   if !hathi_identifiers.nil? && !hathi_identifiers.empty?
     hathi_identifiers.split(',').each do |hathi_identifier|
       if identifiers[identifier_key].has_key?(hathi_identifier)
@@ -49,13 +50,16 @@ def check_identifiers(identifiers, ia_volumes, ia_published, volume_identifier, 
           #    puts [volume_identifier, hathi_volume, ia_identifier, ia_volumes[ia_identifier]].join(',')
           #  end
           # $stderr.puts [volume_identifier, hathi_published, ia_identifier, ia_published[ia_identifier]].join(' ')
-          if !hathi_published.nil? && !hathi_published.empty? && !ia_published[ia_identifier].nil? && !ia_published[ia_identifier].empty?
-            if check_published(hathi_published, ia_published[ia_identifier])
-              puts [volume_identifier, ia_identifier].join(',')
-            end
-          else
-            puts [volume_identifier, ia_identifier].join(',')
-          end
+          # if !hathi_published.nil? && !hathi_published.empty? && !ia_published[ia_identifier].nil? && !ia_published[ia_identifier].empty?
+          #  if check_published(hathi_published, ia_published[ia_identifier])
+          #    puts [volume_identifier, ia_identifier].join(',')
+          #  end
+          # else
+          #  puts [volume_identifier, ia_identifier].join(',')
+          # end
+          ht_ia_match_scores[volume_identifier] ||= {}
+          ht_ia_match_scores[volume_identifier][ia_identifier] ||= 0
+          ht_ia_match_scores[volume_identifier][ia_identifier] += 1
         end
       end
     end
@@ -87,8 +91,15 @@ end
 
 $stderr.puts "Parsing HathiTrust metadata..."
 CSV.foreach(hathifile, :headers => false, :col_sep => "\t", :quote_char => "\u{FFFF}") do |row|
-  check_identifiers(identifiers, ia_volumes, ia_published, row[0], row[4], row[16], row[7], 'oclc-id')
-  check_identifiers(identifiers, ia_volumes, ia_published, row[0], row[4], row[16], row[8], 'isbn')
-  check_identifiers(identifiers, ia_volumes, ia_published, row[0], row[4], row[16], row[9], 'issn')
-  check_identifiers(identifiers, ia_volumes, ia_published, row[0], row[4], row[16], row[10], 'lccn')
+  check_identifiers(ht_ia_match_scores, identifiers, ia_volumes, ia_published, row[0], row[4], row[16], row[7], 'oclc-id')
+  check_identifiers(ht_ia_match_scores, identifiers, ia_volumes, ia_published, row[0], row[4], row[16], row[8], 'isbn')
+  check_identifiers(ht_ia_match_scores, identifiers, ia_volumes, ia_published, row[0], row[4], row[16], row[9], 'issn')
+  check_identifiers(ht_ia_match_scores, identifiers, ia_volumes, ia_published, row[0], row[4], row[16], row[10], 'lccn')
+end
+
+$stderr.puts "Outputting match scores..."
+ht_ia_match_scores.each_key do |ht|
+  ht_ia_match_scores[ht].each_key do |ia|
+    puts [ht, ia, ht_ia_match_scores[ht][ia]].join(',')
+  end
 end

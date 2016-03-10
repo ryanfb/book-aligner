@@ -51,10 +51,10 @@ def check_identifiers(identifiers, ia_volumes, ia_published, volume_identifier, 
           # $stderr.puts [volume_identifier, hathi_published, ia_identifier, ia_published[ia_identifier]].join(' ')
           if !hathi_published.nil? && !hathi_published.empty? && !ia_published[ia_identifier].nil? && !ia_published[ia_identifier].empty?
             if check_published(hathi_published, ia_published[ia_identifier])
-              puts [volume_identifier, hathi_published, ia_identifier, ia_published[ia_identifier]].join(',')
+              puts [volume_identifier, ia_identifier].join(',')
             end
           else
-            puts [volume_identifier, hathi_volume, ia_identifier, ia_volumes[ia_identifier]].join(',')
+            puts [volume_identifier, ia_identifier].join(',')
           end
         end
       end
@@ -65,7 +65,9 @@ end
 $stderr.puts "Parsing Internet Archive metadata..."
 CSV.foreach(internet_archive, :headers => true) do |row|
   ia_volumes[row['identifier']] = row['volume']
-  unless row['date'].nil? || row['date'].empty?
+  if !row['year'].nil? && !row['year'].empty?
+    ia_published[row['identifier']] = row['year']
+  elsif !row['date'].nil? && !row['date'].empty?
     begin
       # ia_published[row['identifier']] = Time.parse(row['date']).year.to_s
       # Just take the first digit string as year, since IA date metdata is…problematic

@@ -10,7 +10,9 @@ internet_archive, hathifile = ARGV
 
 identifiers = {}
 ia_volumes = {}
-ia_published = {}
+ia_date = {}
+ia_year = {}
+ht_year = {}
 ht_ia_match_scores = {}
 
 def check_volumes(ht_vol, ia_vol)
@@ -70,12 +72,13 @@ $stderr.puts "Parsing Internet Archive metadata..."
 CSV.foreach(internet_archive, :headers => true) do |row|
   ia_volumes[row['identifier']] = row['volume']
   if !row['year'].nil? && !row['year'].empty?
-    ia_published[row['identifier']] = row['year']
-  elsif !row['date'].nil? && !row['date'].empty?
+    ia_year[row['identifier']] = row['year']
+  end
+  if !row['date'].nil? && !row['date'].empty?
     begin
-      # ia_published[row['identifier']] = Time.parse(row['date']).year.to_s
+      # ia_date[row['identifier']] = Time.parse(row['date']).year.to_s
       # Just take the first digit string as year, since IA date metdata is…problematic
-      ia_published[row['identifier']] = /^(\d+)/.match(row['date']).captures.first
+      ia_date[row['identifier']] = /^(\d+)/.match(row['date']).captures.first
     rescue Exception => e
       $stderr.puts(e.message + "\nSkipping #{row['date']} for #{row['identifier']}")
     end
@@ -91,15 +94,24 @@ end
 
 $stderr.puts "Parsing HathiTrust metadata..."
 CSV.foreach(hathifile, :headers => false, :col_sep => "\t", :quote_char => "\u{FFFF}") do |row|
-  check_identifiers(ht_ia_match_scores, identifiers, ia_volumes, ia_published, row[0], row[4], row[16], row[7], 'oclc-id')
-  check_identifiers(ht_ia_match_scores, identifiers, ia_volumes, ia_published, row[0], row[4], row[16], row[8], 'isbn')
-  check_identifiers(ht_ia_match_scores, identifiers, ia_volumes, ia_published, row[0], row[4], row[16], row[9], 'issn')
-  check_identifiers(ht_ia_match_scores, identifiers, ia_volumes, ia_published, row[0], row[4], row[16], row[10], 'lccn')
+  ht_year[row[0]] = row[16]
+  check_identifiers(ht_ia_match_scores, identifiers, ia_volumes, nil, row[0], row[4], row[16], row[7], 'oclc-id')
+  check_identifiers(ht_ia_match_scores, identifiers, ia_volumes, nil, row[0], row[4], row[16], row[8], 'isbn')
+  check_identifiers(ht_ia_match_scores, identifiers, ia_volumes, nil, row[0], row[4], row[16], row[9], 'issn')
+  check_identifiers(ht_ia_match_scores, identifiers, ia_volumes, nil, row[0], row[4], row[16], row[10], 'lccn')
 end
 
 $stderr.puts "Outputting match scores..."
 ht_ia_match_scores.each_key do |ht|
   ht_ia_match_scores[ht].each_key do |ia|
-    puts [ht, ia, ht_ia_match_scores[ht][ia]].join(',')
+    if (!ht_year[ht].nil? && !ht_year[ht].empty?) && ((!ia_year[ia].nil? && !ia_year[ia].empty?) || (!ia_date[ia].nil? && !ia_date[ia].empty?))
+      if (!ia_year[ia].nil? && !ia_year[ia].empty? && check_published(ht_year[ht],ia_year[ia]))
+        puts [ht, ia, ht_ia_match_scores[ht][ia] + 8].join(',')
+      elsif check_published(ht_year[ht],ia_date[ia])
+        puts [ht, ia, ht_ia_match_scores[ht][ia] + 4].join(',')
+      end
+    else
+      puts [ht, ia, ht_ia_match_scores[ht][ia]].join(',')
+    end
   end
 end

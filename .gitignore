@@ -1,2 +1,4 @@
 *.csv
 *.tsv
+_site
+.jekyll-metadata

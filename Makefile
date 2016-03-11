@@ -1,4 +1,7 @@
-all: alignment-unique.csv
+all: alignment-unique.csv alignment-filtered.csv
+
+alignment-filtered.csv: alignment.csv
+	grep -v ',[123]$$' $^ > $@
 
 alignment-unique.csv: alignment.csv
 	sort $^ | uniq > $@

@@ -1,0 +1,2 @@
+baseurl: /book-aligner
+exclude: ['*.csv', '*.tsv']

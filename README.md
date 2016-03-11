@@ -24,6 +24,10 @@ The `book-aligner.rb` script uses bulk metadata downloads from HathiTrust and th
 
 [![HT/IA/GB Relationship Diagram](http://i.imgur.com/KNr1BZzm.jpg)](http://imgur.com/KNr1BZz)
 
+Because there's no freely-available bulk metadata download for Google Books, we'll have to rely on the 1.1M associations we get for free from Internet Archive metadata.
+
+Soon I plan to add a second component: a GitHub Pages HTML frontend which will include a small JavaSript library that queries `book-aligner.rb` matches loaded into Fusion Tables. This may be able to make limited client-side use of the Google Books API for individual queries to improve results.
+
 ## Examples
 
 Some examples of what I want for "matching volumes":

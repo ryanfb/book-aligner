@@ -42,7 +42,7 @@ def check_published(ht_pub, ia_pub)
   return ht_pub == ia_pub
 end
 
-def check_standard_identifiers(ht_ia_match_scores, standard_identifiers, ht_identifier, identifier_string, standard_identifier_key)
+def check_identifiers(ht_ia_match_scores, standard_identifiers, ht_identifier, identifier_string, standard_identifier_key)
   if !identifier_string.nil? && !identifier_string.empty?
     identifier_string.split(',').each do |identifier_to_check|
       if standard_identifiers[standard_identifier_key].has_key?(identifier_to_check)

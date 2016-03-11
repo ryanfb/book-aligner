@@ -22,6 +22,8 @@ The default `make` target should download and run everything.
 
 The `book-aligner.rb` script uses bulk metadata downloads from HathiTrust and the Internet Archive to find the complete set of identifiers that have any matching OCLC/LCCN/ISSN/ISBN identifier (~41M matches). These results are then filtered to those that have a matching volume number or publication year.
 
+[![HT/IA/GB Relationship Diagram](http://i.imgur.com/KNr1BZzm.jpg)](http://imgur.com/KNr1BZz)
+
 ## Examples
 
 Some examples of what I want for "matching volumes":

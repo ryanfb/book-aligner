@@ -73,6 +73,18 @@ process_ht_id = (ht_id) ->
   ht_biblio_query(ht_id)
   console.log ht_id
 
+ia_biblio_query = (ia_id) ->
+  $.ajax "https://archive.org/metadata/#{ia_id}",
+    type: 'GET'
+    cache: true
+    dataType: 'json'
+    crossDomain: true
+    error: (jqXHR, textStatus, errorThrown) ->
+      console.log "AJAX Error: #{textStatus}"
+    success: (data) ->
+      console.log data
+      $("##{html_id(ia_id)}").append($('<span/>').text(" - #{data.metadata.title}, #{data.metadata.year}, v.#{data.metadata.volume}"))
+
 process_ia = (identifier_string) ->
   console.log 'process_ia'
   match = identifier_string.match(IA_REGEX)
@@ -91,6 +103,7 @@ ia_url = (ia_id) ->
 process_ia_id = (ia_id) ->
   ia_link = $('<a/>',{href: ia_url(ia_id),target: '_blank'}).text(ia_id)
   $('#results_list').append($('<li/>', {id: html_id(ia_id)}).append(ia_link))
+  ia_biblio_query(ia_id)
   console.log ia_id
 
 process_gb = (identifier_string) ->

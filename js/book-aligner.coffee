@@ -37,7 +37,7 @@ fusion_tables_query = (query, callback, error_callback) ->
 no_results = ->
   $('#results_list').append($('<li/>').text('No results.'))
 
-ht_biblio_query = (ht_id) ->
+ht_biblio_query = (ht_id, score = 0) ->
   $.ajax "http://catalog.hathitrust.org/api/volumes/brief/htid/#{ht_id}.json",
     type: 'GET'
     cache: true
@@ -50,30 +50,39 @@ ht_biblio_query = (ht_id) ->
       ht_object = _.filter(data.items, (item) -> item.htid == ht_id)[0]
       console.log(ht_object)
       $("##{html_id(ht_id)}").append($('<span/>').text(" - #{_.values(data.records)[0].titles[0]}, #{_.values(data.records)[0].publishDates[0]}, #{ht_object.enumcron}"))
+      $('#table').DataTable().row.add([
+        "<a href='#{ht_url(ht_id)}' target='_blank'>#{ht_id}</a>",
+        _.values(data.records)[0].titles[0],
+        _.values(data.records)[0].publishDates[0],
+        ht_object.enumcron,
+        null,
+        score
+      ]).draw(false)
+      $('#table').DataTable().columns.adjust().draw()
       # (Original from #{ht_object.orig})
 
 process_ht = (identifier_string) ->
   console.log 'process_ht'
   match = identifier_string.match(HT_REGEX)
   ht_id = match[1].split('&')[0]
-  process_ht_id(ht_id)
-  fusion_tables_query "SELECT ia_identifier FROM #{FUSION_TABLES_ID} WHERE ht_identifier = #{fusion_tables_escape(ht_id)} ORDER BY score DESC",
+  process_ht_id(ht_id, 100)
+  fusion_tables_query "SELECT ia_identifier,score FROM #{FUSION_TABLES_ID} WHERE ht_identifier = #{fusion_tables_escape(ht_id)} ORDER BY score DESC",
     (data) ->
       if data.rows?
-        process_ia_id(row[0]) for row in data.rows.reverse()
+        process_ia_id(row[0],row[1]) for row in data.rows.reverse()
       else
         no_results()
 
 ht_url = (ht_id) ->
   "https://babel.hathitrust.org/cgi/pt?id=#{ht_id}"
 
-process_ht_id = (ht_id) ->
+process_ht_id = (ht_id, score = 0) ->
   ht_link = $('<a/>', {href: ht_url(ht_id), target: '_blank'}).text(ht_id)
   $('#results_list').append($('<li/>', {id: html_id(ht_id)}).append(ht_link))
-  ht_biblio_query(ht_id)
+  ht_biblio_query(ht_id, score)
   console.log ht_id
 
-ia_biblio_query = (ia_id) ->
+ia_biblio_query = (ia_id, score = 0) ->
   $.ajax "https://archive.org/metadata/#{ia_id}",
     type: 'GET'
     cache: true
@@ -84,31 +93,41 @@ ia_biblio_query = (ia_id) ->
     success: (data) ->
       console.log data
       $("##{html_id(ia_id)}").append($('<span/>').text(" - #{data.metadata.title}, #{data.metadata.year}, v.#{data.metadata.volume}, #{data.metadata.imagecount} pages"))
+      $('#table').DataTable().row.add([
+        "<a href='#{ia_url(ia_id)}' target='_blank'>#{ia_id}</a>",
+        data.metadata.title,
+        data.metadata.year,
+        data.metadata.volume,
+        data.metadata.imagecount,
+        score
+      ]).draw(false)
+      $('#table').DataTable().columns.adjust().draw()
+
       if data.metadata.source? && data.metadata.source.match(GB_REGEX)
-        process_gb(data.metadata.source)
+        process_gb(data.metadata.source, score)
 
 process_ia = (identifier_string) ->
   console.log 'process_ia'
   match = identifier_string.match(IA_REGEX)
   ia_id = match[1].split('&')[0]
-  process_ia_id(ia_id)
-  fusion_tables_query "SELECT ht_identifier FROM #{FUSION_TABLES_ID} WHERE ia_identifier = #{fusion_tables_escape(ia_id)} ORDER BY score DESC",
+  process_ia_id(ia_id, 100)
+  fusion_tables_query "SELECT ht_identifier,score FROM #{FUSION_TABLES_ID} WHERE ia_identifier = #{fusion_tables_escape(ia_id)} ORDER BY score DESC",
     (data) ->
       if data.rows?
-        process_ht_id(row[0]) for row in data.rows.reverse()
+        process_ht_id(row[0],row[1]) for row in data.rows.reverse()
       else
         no_results()
 
 ia_url = (ia_id) ->
   "https://archive.org/details/#{ia_id}"
 
-process_ia_id = (ia_id) ->
+process_ia_id = (ia_id, score = 0) ->
   ia_link = $('<a/>',{href: ia_url(ia_id),target: '_blank'}).text(ia_id)
   $('#results_list').append($('<li/>', {id: html_id(ia_id)}).append(ia_link))
-  ia_biblio_query(ia_id)
+  ia_biblio_query(ia_id, score)
   console.log ia_id
 
-gb_biblio_query = (gb_id) ->
+gb_biblio_query = (gb_id, score = 0) ->
   $.ajax "https://www.googleapis.com/books/v1/volumes/#{gb_id}",
     type: 'GET'
     cache: true
@@ -119,24 +138,44 @@ gb_biblio_query = (gb_id) ->
     success: (data) ->
       console.log data
       $("##{html_id(gb_id)}").append($('<span/>').text(" - #{data.volumeInfo.title}, #{data.volumeInfo.publishedDate}, #{data.volumeInfo.pageCount} pages"))
+      $('#table').DataTable().row.add([
+        "<a href='#{gb_url(gb_id)}' target='_blank'>#{gb_id}</a>",
+        data.volumeInfo.title,
+        data.volumeInfo.publishedDate,
+        null,
+        data.volumeInfo.pageCount,
+        score
+      ]).draw(false)
+      $('#table').DataTable().columns.adjust().draw()
 
-process_gb = (identifier_string) ->
+
+process_gb = (identifier_string, score = 0) ->
   console.log 'process_gb'
   match = identifier_string.match(GB_REGEX)
   gb_id = match[1].split('&')[0]
-  process_gb_id(gb_id)
+  process_gb_id(gb_id, score)
 
 gb_url = (gb_id) ->
   "https://books.google.com/books?id=#{gb_id}"
 
-process_gb_id = (gb_id) ->
+process_gb_id = (gb_id, score = 0) ->
   gb_link = $('<a/>',{href: gb_url(gb_id),target: '_blank'}).text(gb_id)
   $('#results_list').append($('<li/>', {id: html_id(gb_id)}).append(gb_link))
-  gb_biblio_query(gb_id)
+  gb_biblio_query(gb_id, score)
   console.log gb_id
 
 process_identifier = (identifier_string) ->
   $('#results').empty()
+  $('#results').append($('<table/>',{id: 'table', class: 'display', cellspacing: 0, width: '100%'}))
+  table_header = $('<tr/>')
+  table_header.append($('<th/>').text('Identifier'))
+  table_header.append($('<th/>').text('Title'))
+  table_header.append($('<th/>').text('Year'))
+  table_header.append($('<th/>').text('Volume'))
+  table_header.append($('<th/>').text('Pages'))
+  table_header.append($('<th/>').text('Score'))
+  $('#table').append($('<thead/>').append(table_header))
+  $('#table').DataTable({"autoWidth": true, "order": [[ 5, "desc" ]]})
   $('#results').append($('<ul/>',{id: 'results_list'}))
   $('#results_list').before($('<p/>').text("You searched for #{identifier_string}"))
   $('#results_list').before($('<p/>').text("Results:"))

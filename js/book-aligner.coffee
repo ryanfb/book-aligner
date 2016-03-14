@@ -10,6 +10,9 @@ HT_REGEX = /^https?:\/\/babel\.hathitrust\.org\/cgi\/pt\?id=(.+)/
 IA_REGEX = /^https?:\/\/archive\.org\/details\/(.+)/
 GB_REGEX = /^https?:\/\/books\.google\.com\/books\?id=(.+)/
 
+html_id = (input) ->
+  input.replace(/[:.,'-]/g,'_')
+
 # wrap values in single quotes and backslash-escape single-quotes
 fusion_tables_escape = (value) ->
   "'#{value.replace(/'/g,"\\\'")}'"
@@ -31,22 +34,45 @@ fusion_tables_query = (query, callback, error_callback) ->
           if callback?
             callback(data)
 
+no_results = ->
+  $('#results_list').append($('<li/>').text('No results.'))
+
 process_ht = (identifier_string) ->
   console.log 'process_ht'
   match = identifier_string.match(HT_REGEX)
   console.log match[1]
-  fusion_tables_query "SELECT ia_identifier FROM #{FUSION_TABLES_ID} WHERE ht_identifier = #{fusion_tables_escape(match[1])} ORDER BY score DESC", (data) -> process_ia_id(row[0]) for row in data.rows
+  fusion_tables_query "SELECT ia_identifier FROM #{FUSION_TABLES_ID} WHERE ht_identifier = #{fusion_tables_escape(match[1])} ORDER BY score DESC",
+    (data) ->
+      if data.rows?
+        process_ia_id(row[0]) for row in data.rows.reverse()
+      else
+        no_results()
+
+ht_url = (ht_id) ->
+  "https://babel.hathitrust.org/cgi/pt?id=#{ht_id}"
 
 process_ht_id = (ht_id) ->
+  ht_link = $('<a/>', {href: ht_url(ht_id), target: '_blank'}).text(ht_id)
+  $('#results_list').append($('<li/>', {id: html_id(ht_id)}).append(ht_link))
   console.log ht_id
 
 process_ia = (identifier_string) ->
   console.log 'process_ia'
   match = identifier_string.match(IA_REGEX)
   console.log match[1]
-  fusion_tables_query "SELECT ht_identifier FROM #{FUSION_TABLES_ID} WHERE ia_identifier = #{fusion_tables_escape(match[1])} ORDER BY score DESC", (data) -> process_ht_id(row[0]) for row in data.rows
+  fusion_tables_query "SELECT ht_identifier FROM #{FUSION_TABLES_ID} WHERE ia_identifier = #{fusion_tables_escape(match[1])} ORDER BY score DESC",
+    (data) ->
+      if data.rows?
+        process_ht_id(row[0]) for row in data.rows.reverse()
+      else
+        no_results()
+
+ia_url = (ia_id) ->
+  "https://archive.org/details/#{ia_id}"
 
 process_ia_id = (ia_id) ->
+  ia_link = $('<a/>',{href: ia_url(ia_id),target: '_blank'}).text(ia_id)
+  $('#results_list').append($('<li/>', {id: html_id(ia_id)}).append(ia_link))
   console.log ia_id
 
 process_gb = (identifier_string) ->
@@ -55,7 +81,10 @@ process_gb = (identifier_string) ->
   console.log match[1]
 
 process_identifier = (identifier_string) ->
-  console.log identifier_string
+  $('#results').empty()
+  $('#results').append($('<ul/>',{id: 'results_list'}))
+  $('#results_list').before($('<p/>').text("You searched for #{identifier_string}"))
+  $('#results_list').before($('<p/>').text("Results:"))
   switch
     when identifier_string.match(HT_REGEX) then process_ht(identifier_string)
     when identifier_string.match(IA_REGEX) then process_ia(identifier_string)

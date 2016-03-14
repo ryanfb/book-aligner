@@ -84,6 +84,8 @@ ia_biblio_query = (ia_id) ->
     success: (data) ->
       console.log data
       $("##{html_id(ia_id)}").append($('<span/>').text(" - #{data.metadata.title}, #{data.metadata.year}, v.#{data.metadata.volume}"))
+      if data.metadata.source? && data.metadata.source.match(GB_REGEX)
+        process_gb(data.metadata.source)
 
 process_ia = (identifier_string) ->
   console.log 'process_ia'
@@ -109,7 +111,16 @@ process_ia_id = (ia_id) ->
 process_gb = (identifier_string) ->
   console.log 'process_gb'
   match = identifier_string.match(GB_REGEX)
-  console.log match[1]
+  gb_id = match[1].split('&')[0]
+  process_gb_id(gb_id)
+
+gb_url = (gb_id) ->
+  "https://books.google.com/books?id=#{gb_id}"
+
+process_gb_id = (gb_id) ->
+  gb_link = $('<a/>',{href: gb_url(gb_id),target: '_blank'}).text(gb_id)
+  $('#results_list').append($('<li/>', {id: html_id(gb_id)}).append(gb_link))
+  console.log gb_id
 
 process_identifier = (identifier_string) ->
   $('#results').empty()

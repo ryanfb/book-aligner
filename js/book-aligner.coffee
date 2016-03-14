@@ -40,8 +40,8 @@ no_results = ->
 process_ht = (identifier_string) ->
   console.log 'process_ht'
   match = identifier_string.match(HT_REGEX)
-  console.log match[1]
-  fusion_tables_query "SELECT ia_identifier FROM #{FUSION_TABLES_ID} WHERE ht_identifier = #{fusion_tables_escape(match[1])} ORDER BY score DESC",
+  ht_id = match[1].split('&')[0]
+  fusion_tables_query "SELECT ia_identifier FROM #{FUSION_TABLES_ID} WHERE ht_identifier = #{fusion_tables_escape(ht_id)} ORDER BY score DESC",
     (data) ->
       if data.rows?
         process_ia_id(row[0]) for row in data.rows.reverse()
@@ -59,8 +59,8 @@ process_ht_id = (ht_id) ->
 process_ia = (identifier_string) ->
   console.log 'process_ia'
   match = identifier_string.match(IA_REGEX)
-  console.log match[1]
-  fusion_tables_query "SELECT ht_identifier FROM #{FUSION_TABLES_ID} WHERE ia_identifier = #{fusion_tables_escape(match[1])} ORDER BY score DESC",
+  ia_id = match[1].split('&')[0]
+  fusion_tables_query "SELECT ht_identifier FROM #{FUSION_TABLES_ID} WHERE ia_identifier = #{fusion_tables_escape(ia_id)} ORDER BY score DESC",
     (data) ->
       if data.rows?
         process_ht_id(row[0]) for row in data.rows.reverse()
@@ -89,7 +89,7 @@ process_identifier = (identifier_string) ->
     when identifier_string.match(HT_REGEX) then process_ht(identifier_string)
     when identifier_string.match(IA_REGEX) then process_ia(identifier_string)
     when identifier_string.match(GB_REGEX) then process_gb(identifier_string)
-    else alert('Unsupported identifier string.')
+    else $('#results_list').append($('<li/>').text('Unsupported identifier string.'))
 
 find_matches = ->
   process_identifier($('#identifier_input').val())

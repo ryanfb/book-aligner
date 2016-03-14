@@ -24,6 +24,9 @@ ia-oclc-lccn-issn-isbn-vol-pub.csv:
 ia-goog.csv:
 	curl -o $@ 'https://archive.org/advancedsearch.php?q=mediatype%3Atexts&fl%5B%5D=identifier&fl%5B%5D=google-id&fl%5B%5D=source&sort%5B%5D=&rows=9999999&page=1&output=csv&save=yes'
 
+ia-title.csv:
+	curl -o $@ 'https://archive.org/advancedsearch.php?q=mediatype%3Atexts&fl%5B%5D=identifier&fl%5B%5D=title&fl%5B%5D=source&sort%5B%5D=&rows=9999999&page=1&output=csv&save=yes'
+
 ia-oclc-lccn-issn-isbn-vol-pub-goog.csv: ia-oclc-lccn-issn-isbn-vol-pub.csv ia-goog.csv
 	csvjoin -c "identifier" $^ > $@
 

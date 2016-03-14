@@ -83,7 +83,7 @@ ia_biblio_query = (ia_id) ->
       console.log "AJAX Error: #{textStatus}"
     success: (data) ->
       console.log data
-      $("##{html_id(ia_id)}").append($('<span/>').text(" - #{data.metadata.title}, #{data.metadata.year}, v.#{data.metadata.volume}"))
+      $("##{html_id(ia_id)}").append($('<span/>').text(" - #{data.metadata.title}, #{data.metadata.year}, v.#{data.metadata.volume}, #{data.metadata.imagecount} pages"))
       if data.metadata.source? && data.metadata.source.match(GB_REGEX)
         process_gb(data.metadata.source)
 
@@ -108,6 +108,18 @@ process_ia_id = (ia_id) ->
   ia_biblio_query(ia_id)
   console.log ia_id
 
+gb_biblio_query = (gb_id) ->
+  $.ajax "https://www.googleapis.com/books/v1/volumes/#{gb_id}",
+    type: 'GET'
+    cache: true
+    dataType: 'json'
+    crossDomain: true
+    error: (jqXHR, textStatus, errorThrown) ->
+      console.log "AJAX Error: #{textStatus}"
+    success: (data) ->
+      console.log data
+      $("##{html_id(gb_id)}").append($('<span/>').text(" - #{data.volumeInfo.title}, #{data.volumeInfo.publishedDate}, #{data.volumeInfo.pageCount} pages"))
+
 process_gb = (identifier_string) ->
   console.log 'process_gb'
   match = identifier_string.match(GB_REGEX)
@@ -120,6 +132,7 @@ gb_url = (gb_id) ->
 process_gb_id = (gb_id) ->
   gb_link = $('<a/>',{href: gb_url(gb_id),target: '_blank'}).text(gb_id)
   $('#results_list').append($('<li/>', {id: html_id(gb_id)}).append(gb_link))
+  gb_biblio_query(gb_id)
   console.log gb_id
 
 process_identifier = (identifier_string) ->

@@ -37,10 +37,26 @@ fusion_tables_query = (query, callback, error_callback) ->
 no_results = ->
   $('#results_list').append($('<li/>').text('No results.'))
 
+ht_biblio_query = (ht_id) ->
+  $.ajax "http://catalog.hathitrust.org/api/volumes/brief/htid/#{ht_id}.json",
+    type: 'GET'
+    cache: true
+    dataType: 'json'
+    crossDomain: true
+    error: (jqXHR, textStatus, errorThrown) ->
+      console.log "AJAX Error: #{textStatus}"
+    success: (data) ->
+      console.log data
+      ht_object = _.filter(data.items, (item) -> item.htid == ht_id)[0]
+      console.log(ht_object)
+      $("##{html_id(ht_id)}").append($('<span/>').text(" - #{_.values(data.records)[0].titles[0]}, #{_.values(data.records)[0].publishDates[0]}, #{ht_object.enumcron}"))
+      # (Original from #{ht_object.orig})
+
 process_ht = (identifier_string) ->
   console.log 'process_ht'
   match = identifier_string.match(HT_REGEX)
   ht_id = match[1].split('&')[0]
+  process_ht_id(ht_id)
   fusion_tables_query "SELECT ia_identifier FROM #{FUSION_TABLES_ID} WHERE ht_identifier = #{fusion_tables_escape(ht_id)} ORDER BY score DESC",
     (data) ->
       if data.rows?
@@ -54,12 +70,14 @@ ht_url = (ht_id) ->
 process_ht_id = (ht_id) ->
   ht_link = $('<a/>', {href: ht_url(ht_id), target: '_blank'}).text(ht_id)
   $('#results_list').append($('<li/>', {id: html_id(ht_id)}).append(ht_link))
+  ht_biblio_query(ht_id)
   console.log ht_id
 
 process_ia = (identifier_string) ->
   console.log 'process_ia'
   match = identifier_string.match(IA_REGEX)
   ia_id = match[1].split('&')[0]
+  process_ia_id(ia_id)
   fusion_tables_query "SELECT ht_identifier FROM #{FUSION_TABLES_ID} WHERE ia_identifier = #{fusion_tables_escape(ia_id)} ORDER BY score DESC",
     (data) ->
       if data.rows?

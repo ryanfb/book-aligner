@@ -35,12 +35,19 @@ process_ht = (identifier_string) ->
   console.log 'process_ht'
   match = identifier_string.match(HT_REGEX)
   console.log match[1]
+  fusion_tables_query "SELECT ia_identifier FROM #{FUSION_TABLES_ID} WHERE ht_identifier = #{fusion_tables_escape(match[1])} ORDER BY score DESC", (data) -> process_ia_id(row[0]) for row in data.rows
+
+process_ht_id = (ht_id) ->
+  console.log ht_id
 
 process_ia = (identifier_string) ->
   console.log 'process_ia'
   match = identifier_string.match(IA_REGEX)
   console.log match[1]
-  fusion_tables_query "SELECT ht_identifier FROM #{FUSION_TABLES_ID} WHERE ia_identifier = #{fusion_tables_escape(match[1])} ORDER BY score DESC"
+  fusion_tables_query "SELECT ht_identifier FROM #{FUSION_TABLES_ID} WHERE ia_identifier = #{fusion_tables_escape(match[1])} ORDER BY score DESC", (data) -> process_ht_id(row[0]) for row in data.rows
+
+process_ia_id = (ia_id) ->
+  console.log ia_id
 
 process_gb = (identifier_string) ->
   console.log 'process_gb'

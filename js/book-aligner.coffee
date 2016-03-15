@@ -167,15 +167,19 @@ process_gb_id = (gb_id, score = 0) ->
 process_identifier = (identifier_string) ->
   $('#results').empty()
   $('#results').append($('<table/>',{id: 'table', class: 'display', cellspacing: 0, width: '100%'}))
-  table_header = $('<tr/>')
-  table_header.append($('<th/>').text('Identifier'))
-  table_header.append($('<th/>').text('Title'))
-  table_header.append($('<th/>').text('Year'))
-  table_header.append($('<th/>').text('Volume'))
-  table_header.append($('<th/>').text('Pages'))
-  table_header.append($('<th/>').text('Score'))
-  $('#table').append($('<thead/>').append(table_header))
-  $('#table').DataTable({"autoWidth": true, "order": [[ 5, "desc" ]]})
+  $('#table').DataTable({
+    paging: false
+    autoWidth: true
+    order: [[ 5, "desc" ]]
+    columns: [
+      { title: "Identifier" }
+      { title: "Title" }
+      { title: "Year" }
+      { title: "Volume" }
+      { title: "Pages" }
+      { title: "Score" }
+    ]
+  })
   $('#results').append($('<ul/>',{id: 'results_list'}))
   $('#results_list').before($('<p/>').text("You searched for #{identifier_string}"))
   $('#results_list').before($('<p/>').text("Results:"))

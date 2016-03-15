@@ -35,7 +35,7 @@ fusion_tables_query = (query, callback, error_callback) ->
             callback(data)
 
 no_results = ->
-  $('#results_list').append($('<li/>').text('No results.'))
+  $('#results').prepend($('<p/>').text('No results.'))
 
 ht_biblio_query = (ht_id, score = 0) ->
   $.ajax "http://catalog.hathitrust.org/api/volumes/brief/htid/#{ht_id}.json",
@@ -78,7 +78,6 @@ ht_url = (ht_id) ->
 
 process_ht_id = (ht_id, score = 0) ->
   ht_link = $('<a/>', {href: ht_url(ht_id), target: '_blank'}).text(ht_id)
-  $('#results_list').append($('<li/>', {id: html_id(ht_id)}).append(ht_link))
   ht_biblio_query(ht_id, score)
   console.log ht_id
 
@@ -123,7 +122,6 @@ ia_url = (ia_id) ->
 
 process_ia_id = (ia_id, score = 0) ->
   ia_link = $('<a/>',{href: ia_url(ia_id),target: '_blank'}).text(ia_id)
-  $('#results_list').append($('<li/>', {id: html_id(ia_id)}).append(ia_link))
   ia_biblio_query(ia_id, score)
   console.log ia_id
 
@@ -160,7 +158,6 @@ gb_url = (gb_id) ->
 
 process_gb_id = (gb_id, score = 0) ->
   gb_link = $('<a/>',{href: gb_url(gb_id),target: '_blank'}).text(gb_id)
-  $('#results_list').append($('<li/>', {id: html_id(gb_id)}).append(gb_link))
   gb_biblio_query(gb_id, score)
   console.log gb_id
 
@@ -180,14 +177,11 @@ process_identifier = (identifier_string) ->
       { title: "Score" }
     ]
   })
-  $('#results').append($('<ul/>',{id: 'results_list'}))
-  $('#results_list').before($('<p/>').text("You searched for #{identifier_string}"))
-  $('#results_list').before($('<p/>').text("Results:"))
   switch
     when identifier_string.match(HT_REGEX) then process_ht(identifier_string)
     when identifier_string.match(IA_REGEX) then process_ia(identifier_string)
     when identifier_string.match(GB_REGEX) then process_gb(identifier_string)
-    else $('#results_list').append($('<li/>').text('Unsupported identifier string.'))
+    else $('#results').prepend($('<p/>').text('Unsupported identifier string.'))
 
 find_matches = ->
   process_identifier($('#identifier_input').val())

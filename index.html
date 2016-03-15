@@ -26,12 +26,22 @@
       <div class="page-header">
         <h1>Book Aligner</h1>
         <p>Find matching books for a given HathiTrust, Internet Archive, or Google Books URL.</p>
+        
         <form id="identifier_form">
           <input type="text" id="identifier_input" name="identifier" size="80">
           <input type="submit" value="Submit">
         </form>
       </div>
-      <div id="results"/>
+      <div id="results">
+        <div id="examples">
+          <p>Example supported URLs:</p>
+          <ul>
+            <li><code><span>https://archive.org/details/opvscvlaacademi03heyngoog</span></code></li>
+            <li><code><span>http://babel.hathitrust.org/cgi/pt?id=njp.32101076453875</span></code></li>
+            <li><code><span>https://books.google.com/books?id=P5JJAAAAYAAJ</span></code></li>
+          </ul>
+        </div>
+      </div>
     </div>
   </body>
 </html>

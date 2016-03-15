@@ -180,7 +180,7 @@ process_identifier = (identifier_string) ->
   switch
     when identifier_string.match(HT_REGEX) then process_ht(identifier_string)
     when identifier_string.match(IA_REGEX) then process_ia(identifier_string)
-    when identifier_string.match(GB_REGEX) then process_gb(identifier_string)
+    when identifier_string.match(GB_REGEX) then process_gb(identifier_string, 100)
     else $('#results').prepend($('<p/>').text('Unsupported identifier string.'))
 
 find_matches = ->

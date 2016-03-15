@@ -72,7 +72,7 @@ ht_biblio_query = (ht_id, score = 0) ->
 process_ht = (identifier_string) ->
   console.log 'process_ht'
   match = identifier_string.match(HT_REGEX)
-  ht_id = match[1].split('&')[0]
+  ht_id = match[1].split(';')[0]
   process_ht_id(ht_id, 100)
   ht_query(ht_id)
 

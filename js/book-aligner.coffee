@@ -97,7 +97,7 @@ ia_biblio_query = (ia_id, score = 0) ->
         "<a href='#{ia_url(ia_id)}' target='_blank'>#{ia_id}</a>",
         data.metadata.title,
         data.metadata.year,
-        data.metadata.volume,
+        data.metadata.volume || '',
         data.metadata.imagecount,
         score
       ]).draw(false)
@@ -142,7 +142,7 @@ gb_biblio_query = (gb_id, score = 0) ->
         "<a href='#{gb_url(gb_id)}' target='_blank'>#{gb_id}</a>",
         data.volumeInfo.title,
         data.volumeInfo.publishedDate,
-        null,
+        '',
         data.volumeInfo.pageCount,
         score
       ]).draw(false)

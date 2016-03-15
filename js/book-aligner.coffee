@@ -30,6 +30,8 @@ fusion_tables_query = (query, callback, error_callback) ->
         dataType: 'json'
         crossDomain: true
         error: (jqXHR, textStatus, errorThrown) ->
+          $('#results').append($('<div/>',{class: 'alert alert-danger', role: 'alert'}).text('Error in Fusion Tables AJAX call.'))
+          console.log errorThrown
           console.log "AJAX Error: #{textStatus}"
           error_callback() if error_callback?
         success: (data) ->
@@ -47,6 +49,8 @@ ht_biblio_query = (ht_id, score = 0) ->
     dataType: 'json'
     crossDomain: true
     error: (jqXHR, textStatus, errorThrown) ->
+      $('#results').append($('<div/>',{class: 'alert alert-danger', role: 'alert'}).text('Error in HathiTrust AJAX call.'))
+      console.log errorThrown
       console.log "AJAX Error: #{textStatus}"
     success: (data) ->
       console.log data
@@ -69,18 +73,21 @@ process_ht = (identifier_string) ->
   match = identifier_string.match(HT_REGEX)
   ht_id = match[1].split('&')[0]
   process_ht_id(ht_id, 100)
+  ht_query(ht_id)
+
+ht_query = (ht_id, level = 0) ->
   fusion_tables_query "SELECT ia_identifier,score FROM #{HT_IA_TABLE_ID} WHERE ht_identifier = #{fusion_tables_escape(ht_id)} ORDER BY score DESC",
     (data) ->
       if data.rows?
-        process_ia_id(row[0],row[1]) for row in data.rows.reverse()
+        process_ia_id(row[0],(1 - level) * row[1]) for row in data.rows.reverse()
+        if level == 0
+          ia_query(row[0],1) for row in data.rows.reverse()
       else
         no_results()
-
 ht_url = (ht_id) ->
   "https://babel.hathitrust.org/cgi/pt?id=#{ht_id}"
 
 process_ht_id = (ht_id, score = 0) ->
-  ht_link = $('<a/>', {href: ht_url(ht_id), target: '_blank'}).text(ht_id)
   ht_biblio_query(ht_id, score)
   console.log ht_id
 
@@ -91,6 +98,8 @@ ia_biblio_query = (ia_id, score = 0) ->
     dataType: 'json'
     crossDomain: true
     error: (jqXHR, textStatus, errorThrown) ->
+      $('#results').append($('<div/>',{class: 'alert alert-danger', role: 'alert'}).text('Error in Internet Archive AJAX call.'))
+      console.log errorThrown
       console.log "AJAX Error: #{textStatus}"
     success: (data) ->
       console.log data
@@ -98,9 +107,9 @@ ia_biblio_query = (ia_id, score = 0) ->
         $('#table').DataTable().row.add([
           "<a id='#{html_id(ia_id)}' href='#{ia_url(ia_id)}' target='_blank'>#{ia_id}</a>",
           data.metadata.title,
-          data.metadata.year,
+          data.metadata.year || '',
           data.metadata.volume || '',
-          data.metadata.imagecount,
+          data.metadata.imagecount || '',
           score
         ]).draw(false)
         $('#table').DataTable().columns.adjust().draw()
@@ -115,10 +124,15 @@ process_ia = (identifier_string) ->
   match = identifier_string.match(IA_REGEX)
   ia_id = match[1].split('&')[0]
   process_ia_id(ia_id, 100)
+  ia_query(ia_id)
+
+ia_query = (ia_id, level = 0) ->
   fusion_tables_query "SELECT ht_identifier,score FROM #{HT_IA_TABLE_ID} WHERE ia_identifier = #{fusion_tables_escape(ia_id)} ORDER BY score DESC",
     (data) ->
       if data.rows?
-        process_ht_id(row[0],row[1]) for row in data.rows.reverse()
+        process_ht_id(row[0],(1 - level) * row[1]) for row in data.rows.reverse()
+        if level == 0
+          ht_query(row[0], 1) for row in data.rows.reverse()
       else
         no_results()
 
@@ -126,7 +140,6 @@ ia_url = (ia_id) ->
   "https://archive.org/details/#{ia_id}"
 
 process_ia_id = (ia_id, score = 0) ->
-  ia_link = $('<a/>',{href: ia_url(ia_id),target: '_blank'}).text(ia_id)
   ia_biblio_query(ia_id, score)
   console.log ia_id
 
@@ -137,6 +150,8 @@ gb_biblio_query = (gb_id, score = 0) ->
     dataType: 'json'
     crossDomain: true
     error: (jqXHR, textStatus, errorThrown) ->
+      $('#results').append($('<div/>',{class: 'alert alert-danger', role: 'alert'}).text('Error in Google Books AJAX call.'))
+      console.log errorThrown
       console.log "AJAX Error: #{textStatus}"
     success: (data) ->
       console.log data
@@ -146,7 +161,7 @@ gb_biblio_query = (gb_id, score = 0) ->
           data.volumeInfo.title,
           data.volumeInfo.publishedDate,
           '',
-          data.volumeInfo.pageCount,
+          data.volumeInfo.pageCount || '',
           score
         ]).draw(false)
         $('#table').DataTable().columns.adjust().draw()
@@ -157,16 +172,20 @@ process_gb = (identifier_string) ->
   match = identifier_string.match(GB_REGEX)
   gb_id = match[1].split('&')[0]
   process_gb_id(gb_id, 100)
+  gb_query(gb_id)
+
+gb_query = (gb_id, level = 0) ->
   fusion_tables_query "SELECT ia_identifier FROM #{IA_GB_TABLE_ID} WHERE gb_identifier = #{fusion_tables_escape(gb_id)}",
     (data) ->
       if data.rows?
-        process_ia_id(row[0],100) for row in data.rows.reverse()
+        process_ia_id(row[0],(1 - level)*100) for row in data.rows.reverse()
+        if level == 0
+          ia_query(row[0],1) for row in data.rows.reverse()
 
 gb_url = (gb_id) ->
   "https://books.google.com/books?id=#{gb_id}"
 
 process_gb_id = (gb_id, score = 0) ->
-  gb_link = $('<a/>',{href: gb_url(gb_id),target: '_blank'}).text(gb_id)
   gb_biblio_query(gb_id, score)
   console.log gb_id
 

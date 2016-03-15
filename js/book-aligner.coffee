@@ -3,6 +3,7 @@
 
 FUSION_TABLES_URI = 'https://www.googleapis.com/fusiontables/v1'
 
+GOOGLE_BOOKS_API_KEY = 'AIzaSyDkGJOl5EEBahhn1J2kS70FmiRR2uwpFIY'
 GOOGLE_API_KEY = 'AIzaSyACO-ZANrYxHFG44v8kqsfGb6taylh2aDk'
 # Fusion Tables ID of the HT-IA index output from book-aligner.rb
 HT_IA_TABLE_ID = '1ktMz3RDdYEpUu7RTzybkTNCjGg_Vxv0RV1NdC6IL'
@@ -144,7 +145,7 @@ process_ia_id = (ia_id, score = 0) ->
   console.log ia_id
 
 gb_biblio_query = (gb_id, score = 0) ->
-  $.ajax "https://www.googleapis.com/books/v1/volumes/#{gb_id}",
+  $.ajax "https://www.googleapis.com/books/v1/volumes/#{gb_id}?key=#{GOOGLE_BOOKS_API_KEY}",
     type: 'GET'
     cache: true
     dataType: 'json'

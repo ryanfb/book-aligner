@@ -52,17 +52,17 @@ ht_biblio_query = (ht_id, score = 0) ->
       console.log data
       ht_object = _.filter(data.items, (item) -> item.htid == ht_id)[0]
       console.log(ht_object)
-      $("##{html_id(ht_id)}").append($('<span/>').text(" - #{_.values(data.records)[0].titles[0]}, #{_.values(data.records)[0].publishDates[0]}, #{ht_object.enumcron}"))
-      $('#table').DataTable().row.add([
-        "<a href='#{ht_url(ht_id)}' target='_blank'>#{ht_id}</a>",
-        _.values(data.records)[0].titles[0],
-        _.values(data.records)[0].publishDates[0],
-        ht_object.enumcron,
-        null,
-        score
-      ]).draw(false)
-      $('#table').DataTable().columns.adjust().draw()
-      # (Original from #{ht_object.orig})
+      if $("##{html_id(ht_id)}").length == 0
+        $('#table').DataTable().row.add([
+          "<a id='#{html_id(ht_id)}' href='#{ht_url(ht_id)}' target='_blank'>#{ht_id}</a>",
+          _.values(data.records)[0].titles[0],
+          _.values(data.records)[0].publishDates[0],
+          ht_object.enumcron,
+          null,
+          score
+        ]).draw(false)
+        $('#table').DataTable().columns.adjust().draw()
+        # (Original from #{ht_object.orig})
 
 process_ht = (identifier_string) ->
   console.log 'process_ht'
@@ -94,21 +94,21 @@ ia_biblio_query = (ia_id, score = 0) ->
       console.log "AJAX Error: #{textStatus}"
     success: (data) ->
       console.log data
-      $("##{html_id(ia_id)}").append($('<span/>').text(" - #{data.metadata.title}, #{data.metadata.year}, v.#{data.metadata.volume}, #{data.metadata.imagecount} pages"))
-      $('#table').DataTable().row.add([
-        "<a href='#{ia_url(ia_id)}' target='_blank'>#{ia_id}</a>",
-        data.metadata.title,
-        data.metadata.year,
-        data.metadata.volume || '',
-        data.metadata.imagecount,
-        score
-      ]).draw(false)
-      $('#table').DataTable().columns.adjust().draw()
+      if $("##{html_id(ia_id)}").length == 0
+        $('#table').DataTable().row.add([
+          "<a id='#{html_id(ia_id)}' href='#{ia_url(ia_id)}' target='_blank'>#{ia_id}</a>",
+          data.metadata.title,
+          data.metadata.year,
+          data.metadata.volume || '',
+          data.metadata.imagecount,
+          score
+        ]).draw(false)
+        $('#table').DataTable().columns.adjust().draw()
 
-      if data.metadata.source? && data.metadata.source.match(GB_REGEX)
-        match = data.metadata.source.match(GB_REGEX)
-        gb_id = match[1].split('&')[0]
-        process_gb_id(gb_id, score)
+        if data.metadata.source? && data.metadata.source.match(GB_REGEX)
+          match = data.metadata.source.match(GB_REGEX)
+          gb_id = match[1].split('&')[0]
+          process_gb_id(gb_id, score)
 
 process_ia = (identifier_string) ->
   console.log 'process_ia'
@@ -140,16 +140,16 @@ gb_biblio_query = (gb_id, score = 0) ->
       console.log "AJAX Error: #{textStatus}"
     success: (data) ->
       console.log data
-      $("##{html_id(gb_id)}").append($('<span/>').text(" - #{data.volumeInfo.title}, #{data.volumeInfo.publishedDate}, #{data.volumeInfo.pageCount} pages"))
-      $('#table').DataTable().row.add([
-        "<a href='#{gb_url(gb_id)}' target='_blank'>#{gb_id}</a>",
-        data.volumeInfo.title,
-        data.volumeInfo.publishedDate,
-        '',
-        data.volumeInfo.pageCount,
-        score
-      ]).draw(false)
-      $('#table').DataTable().columns.adjust().draw()
+      if $("##{html_id(gb_id)}").length == 0
+        $('#table').DataTable().row.add([
+          "<a id='#{html_id(gb_id)}' href='#{gb_url(gb_id)}' target='_blank'>#{gb_id}</a>",
+          data.volumeInfo.title,
+          data.volumeInfo.publishedDate,
+          '',
+          data.volumeInfo.pageCount,
+          score
+        ]).draw(false)
+        $('#table').DataTable().columns.adjust().draw()
 
 
 process_gb = (identifier_string) ->

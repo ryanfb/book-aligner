@@ -26,7 +26,7 @@ The `book-aligner.rb` script uses bulk metadata downloads from HathiTrust and th
 
 Because there's no freely-available bulk metadata download for Google Books, we'll have to rely on the 1.1M associations we get for free from Internet Archive metadata.
 
-Soon I plan to add a second component: a GitHub Pages HTML frontend which will include a small JavaSript library that queries `book-aligner.rb` matches loaded into Fusion Tables. This may be able to make limited client-side use of the Google Books API for individual queries to improve results.
+The second component of this project is a GitHub Pages HTML frontend which includes a small JavaSript library that queries `book-aligner.rb` matches loaded into Fusion Tables. The code for this is in [`js/book-aligner.coffee`](https://github.com/ryanfb/book-aligner/blob/gh-pages/js/book-aligner.coffee).
 
 ## Examples
 

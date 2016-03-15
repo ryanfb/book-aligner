@@ -4,7 +4,7 @@
 FUSION_TABLES_URI = 'https://www.googleapis.com/fusiontables/v1'
 
 GOOGLE_BOOKS_API_KEY = 'AIzaSyDkGJOl5EEBahhn1J2kS70FmiRR2uwpFIY'
-GOOGLE_API_KEY = 'AIzaSyACO-ZANrYxHFG44v8kqsfGb6taylh2aDk'
+GOOGLE_API_KEY = 'AIzaSyBoQNYbbHb-MEGa4_oq83_JCLt9cKfd4vg'
 # Fusion Tables ID of the HT-IA index output from book-aligner.rb
 HT_IA_TABLE_ID = '1ktMz3RDdYEpUu7RTzybkTNCjGg_Vxv0RV1NdC6IL'
 # Fusion Tables ID of the IA-GB index output as ia-goog-index.csv

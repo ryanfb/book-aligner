@@ -4,7 +4,10 @@
 FUSION_TABLES_URI = 'https://www.googleapis.com/fusiontables/v1'
 
 GOOGLE_API_KEY = 'AIzaSyACO-ZANrYxHFG44v8kqsfGb6taylh2aDk'
-FUSION_TABLES_ID = '1ktMz3RDdYEpUu7RTzybkTNCjGg_Vxv0RV1NdC6IL'
+# Fusion Tables ID of the HT-IA index output from book-aligner.rb
+HT_IA_TABLE_ID = '1ktMz3RDdYEpUu7RTzybkTNCjGg_Vxv0RV1NdC6IL'
+# Fusion Tables ID of the IA-GB index output as ia-goog-index.csv
+IA_GB_TABLE_ID = '1Tg0cm8gXBUwsBGx53GwGhHYiPpt_6YzG-HrR6Ywl'
 
 HT_REGEX = /^https?:\/\/babel\.hathitrust\.org\/cgi\/pt\?id=(.+)/
 IA_REGEX = /^https?:\/\/archive\.org\/details\/(.+)/
@@ -66,7 +69,7 @@ process_ht = (identifier_string) ->
   match = identifier_string.match(HT_REGEX)
   ht_id = match[1].split('&')[0]
   process_ht_id(ht_id, 100)
-  fusion_tables_query "SELECT ia_identifier,score FROM #{FUSION_TABLES_ID} WHERE ht_identifier = #{fusion_tables_escape(ht_id)} ORDER BY score DESC",
+  fusion_tables_query "SELECT ia_identifier,score FROM #{HT_IA_TABLE_ID} WHERE ht_identifier = #{fusion_tables_escape(ht_id)} ORDER BY score DESC",
     (data) ->
       if data.rows?
         process_ia_id(row[0],row[1]) for row in data.rows.reverse()
@@ -103,14 +106,16 @@ ia_biblio_query = (ia_id, score = 0) ->
       $('#table').DataTable().columns.adjust().draw()
 
       if data.metadata.source? && data.metadata.source.match(GB_REGEX)
-        process_gb(data.metadata.source, score)
+        match = data.metadata.source.match(GB_REGEX)
+        gb_id = match[1].split('&')[0]
+        process_gb_id(gb_id, score)
 
 process_ia = (identifier_string) ->
   console.log 'process_ia'
   match = identifier_string.match(IA_REGEX)
   ia_id = match[1].split('&')[0]
   process_ia_id(ia_id, 100)
-  fusion_tables_query "SELECT ht_identifier,score FROM #{FUSION_TABLES_ID} WHERE ia_identifier = #{fusion_tables_escape(ia_id)} ORDER BY score DESC",
+  fusion_tables_query "SELECT ht_identifier,score FROM #{HT_IA_TABLE_ID} WHERE ia_identifier = #{fusion_tables_escape(ia_id)} ORDER BY score DESC",
     (data) ->
       if data.rows?
         process_ht_id(row[0],row[1]) for row in data.rows.reverse()
@@ -147,11 +152,15 @@ gb_biblio_query = (gb_id, score = 0) ->
       $('#table').DataTable().columns.adjust().draw()
 
 
-process_gb = (identifier_string, score = 0) ->
+process_gb = (identifier_string) ->
   console.log 'process_gb'
   match = identifier_string.match(GB_REGEX)
   gb_id = match[1].split('&')[0]
-  process_gb_id(gb_id, score)
+  process_gb_id(gb_id, 100)
+  fusion_tables_query "SELECT ia_identifier FROM #{IA_GB_TABLE_ID} WHERE gb_identifier = #{fusion_tables_escape(gb_id)}",
+    (data) ->
+      if data.rows?
+        process_ia_id(row[0],100) for row in data.rows.reverse()
 
 gb_url = (gb_id) ->
   "https://books.google.com/books?id=#{gb_id}"
@@ -180,7 +189,7 @@ process_identifier = (identifier_string) ->
   switch
     when identifier_string.match(HT_REGEX) then process_ht(identifier_string)
     when identifier_string.match(IA_REGEX) then process_ia(identifier_string)
-    when identifier_string.match(GB_REGEX) then process_gb(identifier_string, 100)
+    when identifier_string.match(GB_REGEX) then process_gb(identifier_string)
     else $('#results').prepend($('<p/>').text('Unsupported identifier string.'))
 
 find_matches = ->

@@ -150,7 +150,7 @@ gb_biblio_query = (gb_id, score = 0) ->
     dataType: 'json'
     crossDomain: true
     error: (jqXHR, textStatus, errorThrown) ->
-      $('#results').append($('<div/>',{class: 'alert alert-danger', role: 'alert'}).text('Error in Google Books AJAX call.'))
+      $('#results').append($('<div/>',{class: 'alert alert-danger', role: 'alert'}).text("Error in Google Books AJAX call for identifier #{gb_id}"))
       console.log errorThrown
       console.log "AJAX Error: #{textStatus}"
     success: (data) ->

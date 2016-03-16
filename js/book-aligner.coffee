@@ -62,7 +62,7 @@ ht_biblio_query = (ht_id, score = 0) ->
           "<a id='#{html_id(ht_id)}' href='#{ht_url(ht_id)}' target='_blank'>#{ht_id}</a>",
           _.values(data.records)[0].titles[0],
           _.values(data.records)[0].publishDates[0],
-          ht_object.enumcron,
+          ht_object.enumcron || '',
           null,
           score
         ]).draw(false)

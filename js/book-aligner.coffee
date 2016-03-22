@@ -5,8 +5,8 @@ FUSION_TABLES_URI = 'https://www.googleapis.com/fusiontables/v1'
 
 GOOGLE_BOOKS_API_KEY = 'AIzaSyDkGJOl5EEBahhn1J2kS70FmiRR2uwpFIY'
 GOOGLE_API_KEY = 'AIzaSyBoQNYbbHb-MEGa4_oq83_JCLt9cKfd4vg'
-# Fusion Tables ID of the HT-IA index output from book-aligner.rb
-HT_IA_TABLE_ID = '1ktMz3RDdYEpUu7RTzybkTNCjGg_Vxv0RV1NdC6IL'
+# Fusion Tables IDs of the HT-IA indices output from merge-results.rb
+HT_IA_TABLE_IDS = ['1Y5uDWMjUzrk6z_8l_C1NzLq9yUSpgS5n473N9dXL','1JNR9hJogOdwsYrNRH0Au_XlLELFViqVXhUg0pgBh']
 # Fusion Tables ID of the IA-GB index output as ia-goog-index.csv
 IA_GB_TABLE_ID = '1Tg0cm8gXBUwsBGx53GwGhHYiPpt_6YzG-HrR6Ywl'
 
@@ -15,7 +15,7 @@ IA_REGEX = /^https?:\/\/archive\.org\/details\/(.+)/
 GB_REGEX = /^https?:\/\/books\.google\.com\/books\?id=(.+)/
 
 html_id = (input) ->
-  input.replace(/[:.,'-]/g,'_')
+  input.replace(/[\/:$.,'-]/g,'_')
 
 # wrap values in single quotes and backslash-escape single-quotes
 fusion_tables_escape = (value) ->
@@ -27,7 +27,6 @@ fusion_tables_query = (query, callback, error_callback) ->
     when 'SELECT'
       $.ajax "#{FUSION_TABLES_URI}/query?sql=#{query}&key=#{GOOGLE_API_KEY}",
         type: 'GET'
-        cache: false
         dataType: 'json'
         crossDomain: true
         error: (jqXHR, textStatus, errorThrown) ->
@@ -39,9 +38,6 @@ fusion_tables_query = (query, callback, error_callback) ->
           console.log data
           if callback?
             callback(data)
-
-no_results = ->
-  $('#results').prepend($('<p/>').text('No results.'))
 
 ht_biblio_query = (ht_id, score = 0) ->
   $.ajax "http://catalog.hathitrust.org/api/volumes/brief/htid/#{ht_id}.json",
@@ -77,14 +73,14 @@ process_ht = (identifier_string) ->
   ht_query(ht_id)
 
 ht_query = (ht_id, level = 0) ->
-  fusion_tables_query "SELECT ia_identifier,score FROM #{HT_IA_TABLE_ID} WHERE ht_identifier = #{fusion_tables_escape(ht_id)} ORDER BY score DESC",
-    (data) ->
-      if data.rows?
-        process_ia_id(row[0],(1 - level) * row[1]) for row in data.rows.reverse()
-        if level == 0
-          ia_query(row[0],1) for row in data.rows.reverse()
-      else
-        no_results()
+  for table_id in HT_IA_TABLE_IDS
+    fusion_tables_query "SELECT ia_identifier,score FROM #{table_id} WHERE ht_identifier = #{fusion_tables_escape(ht_id)} ORDER BY score DESC",
+      (data) ->
+        if data.rows?
+          process_ia_id(row[0],(1 - level) * row[1]) for row in data.rows.reverse()
+          if level == 0
+            ia_query(row[0],1) for row in data.rows.reverse()
+
 ht_url = (ht_id) ->
   "https://babel.hathitrust.org/cgi/pt?id=#{ht_id}"
 
@@ -128,14 +124,13 @@ process_ia = (identifier_string) ->
   ia_query(ia_id)
 
 ia_query = (ia_id, level = 0) ->
-  fusion_tables_query "SELECT ht_identifier,score FROM #{HT_IA_TABLE_ID} WHERE ia_identifier = #{fusion_tables_escape(ia_id)} ORDER BY score DESC",
-    (data) ->
-      if data.rows?
-        process_ht_id(row[0],(1 - level) * row[1]) for row in data.rows.reverse()
-        if level == 0
-          ht_query(row[0], 1) for row in data.rows.reverse()
-      else
-        no_results()
+  for table_id in HT_IA_TABLE_IDS
+    fusion_tables_query "SELECT ht_identifier,score FROM #{table_id} WHERE ia_identifier = #{fusion_tables_escape(ia_id)} ORDER BY score DESC",
+      (data) ->
+        if data.rows?
+          process_ht_id(row[0],(1 - level) * row[1]) for row in data.rows.reverse()
+          if level == 0
+            ht_query(row[0], 1) for row in data.rows.reverse()
 
 ia_url = (ia_id) ->
   "https://archive.org/details/#{ia_id}"

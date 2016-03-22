@@ -1,4 +1,4 @@
-all: alignment-unique.csv alignment-filtered.csv alignment-filtered-joined.csv
+all: alignment-unique.csv alignment-filtered.csv alignment-filtered-joined-titles.csv alignment-filtered-joined-ids.csv
 
 alignment-filtered.csv: alignment.csv
 	grep -v ',[123]$$' $^ > $@
@@ -24,8 +24,8 @@ ia-oclc-lccn-issn-isbn-vol.csv:
 ia-oclc-lccn-issn-isbn-vol-pub.csv:
 	curl -o $@ 'https://archive.org/advancedsearch.php?q=mediatype%3Atexts&fl%5B%5D=identifier&fl%5B%5D=oclc-id&fl%5B%5D=lccn&fl%5B%5D=issn&fl%5B%5D=isbn&fl%5B%5D=volume&fl%5B%5D=date&fl%5B%5D=year&sort%5B%5D=&rows=9999999&page=1&output=csv&save=yes'
 
-alignment-filtered-joined.csv: alignment-filtered.csv titles-alignment.csv merge-results.rb
-	./merge-results.rb alignment-filtered.csv titles-alignment.csv > $@
+alignment-filtered-joined-titles.csv alignment-filtered-joined-ids.csv: alignment-filtered.csv titles-alignment.csv merge-results.rb
+	./merge-results.rb alignment-filtered.csv titles-alignment.csv alignment-filtered-joined-titles.csv alignment-filtered-joined-ids.csv
 
 ia-goog.csv:
 	curl -o $@ 'https://archive.org/advancedsearch.php?q=mediatype%3Atexts&fl%5B%5D=identifier&fl%5B%5D=google-id&fl%5B%5D=source&sort%5B%5D=&rows=9999999&page=1&output=csv&save=yes'

@@ -30,11 +30,13 @@ fusion_tables_query = (query, callback, error_callback) ->
         dataType: 'json'
         crossDomain: true
         error: (jqXHR, textStatus, errorThrown) ->
-          $('#results').append($('<div/>',{class: 'alert alert-danger', role: 'alert'}).text("Error in Fusion Tables AJAX call."))
+          # $('#results').append($('<div/>',{class: 'alert alert-danger', role: 'alert'}).text("Error in Fusion Tables AJAX call."))
           console.log jqXHR
           console.log errorThrown
           console.log "AJAX Error: #{textStatus}"
           error_callback() if error_callback?
+          console.log "Retrying Fusion Tables query: #{query}"
+          fusion_tables_query(query, callback, error_callback)
         success: (data) ->
           console.log data
           if callback?

@@ -6,7 +6,7 @@ FUSION_TABLES_URI = 'https://www.googleapis.com/fusiontables/v1'
 GOOGLE_BOOKS_API_KEY = 'AIzaSyDkGJOl5EEBahhn1J2kS70FmiRR2uwpFIY'
 GOOGLE_API_KEY = 'AIzaSyBoQNYbbHb-MEGa4_oq83_JCLt9cKfd4vg'
 # Fusion Tables IDs of the HT-IA indices output from merge-results.rb
-HT_IA_TABLE_IDS = ['1Y5uDWMjUzrk6z_8l_C1NzLq9yUSpgS5n473N9dXL','1JNR9hJogOdwsYrNRH0Au_XlLELFViqVXhUg0pgBh']
+HT_IA_TABLE_IDS = ['1ktMz3RDdYEpUu7RTzybkTNCjGg_Vxv0RV1NdC6IL']
 # Fusion Tables ID of the IA-GB index output as ia-goog-index.csv
 IA_GB_TABLE_ID = '1Tg0cm8gXBUwsBGx53GwGhHYiPpt_6YzG-HrR6Ywl'
 

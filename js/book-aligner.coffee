@@ -201,7 +201,7 @@ process_identifier = (identifier_string) ->
   $('#table').DataTable({
     paging: false
     autoWidth: true
-    order: [[ 5, "desc" ]]
+    order: [[ 6, "desc" ]]
     columns: [
       { title: "", orderable: false }
       { title: "Identifier" }

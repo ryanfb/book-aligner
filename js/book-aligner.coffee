@@ -43,30 +43,31 @@ fusion_tables_query = (query, callback, error_callback) ->
             callback(data)
 
 ht_biblio_query = (ht_id, score = 0) ->
-  $.ajax "http://catalog.hathitrust.org/api/volumes/brief/htid/#{ht_id}.json",
-    type: 'GET'
-    cache: true
-    dataType: 'json'
-    crossDomain: true
-    error: (jqXHR, textStatus, errorThrown) ->
-      $('#results').append($('<div/>',{class: 'alert alert-danger', role: 'alert'}).text('Error in HathiTrust AJAX call.'))
-      console.log errorThrown
-      console.log "AJAX Error: #{textStatus}"
-    success: (data) ->
-      console.log data
-      ht_object = _.filter(data.items, (item) -> item.htid == ht_id)[0]
-      console.log(ht_object)
-      if $("##{html_id(ht_id)}").length == 0
-        $('#table').DataTable().row.add([
-          "<a id='#{html_id(ht_id)}' href='#{ht_url(ht_id)}' target='_blank'>#{ht_id}</a>",
-          _.values(data.records)[0].titles[0],
-          _.values(data.records)[0].publishDates[0],
-          ht_object.enumcron || '',
-          null,
-          score
-        ]).draw(false)
-        $('#table').DataTable().columns.adjust().draw()
-        # (Original from #{ht_object.orig})
+  if $("##{html_id(ht_id)}").length == 0
+    $.ajax "http://catalog.hathitrust.org/api/volumes/brief/htid/#{ht_id}.json",
+      type: 'GET'
+      cache: true
+      dataType: 'json'
+      crossDomain: true
+      error: (jqXHR, textStatus, errorThrown) ->
+        $('#results').append($('<div/>',{class: 'alert alert-danger', role: 'alert'}).text('Error in HathiTrust AJAX call.'))
+        console.log errorThrown
+        console.log "AJAX Error: #{textStatus}"
+      success: (data) ->
+        console.log data
+        ht_object = _.filter(data.items, (item) -> item.htid == ht_id)[0]
+        console.log(ht_object)
+        if $("##{html_id(ht_id)}").length == 0
+          $('#table').DataTable().row.add([
+            "<a id='#{html_id(ht_id)}' href='#{ht_url(ht_id)}' target='_blank'>#{ht_id}</a>",
+            _.values(data.records)[0].titles[0],
+            _.values(data.records)[0].publishDates[0],
+            ht_object.enumcron || '',
+            null,
+            score
+          ]).draw(false)
+          $('#table').DataTable().columns.adjust().draw()
+          # (Original from #{ht_object.orig})
 
 process_ht = (identifier_string) ->
   console.log 'process_ht'
@@ -92,32 +93,33 @@ process_ht_id = (ht_id, score = 0) ->
   console.log ht_id
 
 ia_biblio_query = (ia_id, score = 0) ->
-  $.ajax "https://archive.org/metadata/#{ia_id}",
-    type: 'GET'
-    cache: true
-    dataType: 'json'
-    crossDomain: true
-    error: (jqXHR, textStatus, errorThrown) ->
-      $('#results').append($('<div/>',{class: 'alert alert-danger', role: 'alert'}).text('Error in Internet Archive AJAX call.'))
-      console.log errorThrown
-      console.log "AJAX Error: #{textStatus}"
-    success: (data) ->
-      console.log data
-      if $("##{html_id(ia_id)}").length == 0
-        $('#table').DataTable().row.add([
-          "<a id='#{html_id(ia_id)}' href='#{ia_url(ia_id)}' target='_blank'>#{ia_id}</a>",
-          data.metadata.title,
-          data.metadata.year || '',
-          data.metadata.volume || '',
-          data.metadata.imagecount || '',
-          score
-        ]).draw(false)
-        $('#table').DataTable().columns.adjust().draw()
+  if $("##{html_id(ia_id)}").length == 0
+    $.ajax "https://archive.org/metadata/#{ia_id}",
+      type: 'GET'
+      cache: true
+      dataType: 'json'
+      crossDomain: true
+      error: (jqXHR, textStatus, errorThrown) ->
+        $('#results').append($('<div/>',{class: 'alert alert-danger', role: 'alert'}).text('Error in Internet Archive AJAX call.'))
+        console.log errorThrown
+        console.log "AJAX Error: #{textStatus}"
+      success: (data) ->
+        console.log data
+        if $("##{html_id(ia_id)}").length == 0
+          $('#table').DataTable().row.add([
+            "<a id='#{html_id(ia_id)}' href='#{ia_url(ia_id)}' target='_blank'>#{ia_id}</a>",
+            data.metadata.title,
+            data.metadata.year || '',
+            data.metadata.volume || '',
+            data.metadata.imagecount || '',
+            score
+          ]).draw(false)
+          $('#table').DataTable().columns.adjust().draw()
 
-        if data.metadata.source? && data.metadata.source.match(GB_REGEX)
-          match = data.metadata.source.match(GB_REGEX)
-          gb_id = match[1].split('&')[0]
-          process_gb_id(gb_id, score)
+          if data.metadata.source? && data.metadata.source.match(GB_REGEX)
+            match = data.metadata.source.match(GB_REGEX)
+            gb_id = match[1].split('&')[0]
+            process_gb_id(gb_id, score)
 
 process_ia = (identifier_string) ->
   console.log 'process_ia'
@@ -143,28 +145,29 @@ process_ia_id = (ia_id, score = 0) ->
   console.log ia_id
 
 gb_biblio_query = (gb_id, score = 0) ->
-  $.ajax "https://www.googleapis.com/books/v1/volumes/#{gb_id}?key=#{GOOGLE_BOOKS_API_KEY}",
-    type: 'GET'
-    cache: true
-    dataType: 'json'
-    crossDomain: true
-    error: (jqXHR, textStatus, errorThrown) ->
-      $('#results').append($('<div/>',{class: 'alert alert-danger', role: 'alert'}).text("Error in Google Books AJAX call for identifier #{gb_id}"))
-      console.log jqXHR
-      console.log errorThrown
-      console.log "AJAX Error: #{textStatus}"
-    success: (data) ->
-      console.log data
-      if $("##{html_id(gb_id)}").length == 0
-        $('#table').DataTable().row.add([
-          "<a id='#{html_id(gb_id)}' href='#{gb_url(gb_id)}' target='_blank'>#{gb_id}</a>",
-          data.volumeInfo.title,
-          data.volumeInfo.publishedDate,
-          '',
-          data.volumeInfo.pageCount || '',
-          score
-        ]).draw(false)
-        $('#table').DataTable().columns.adjust().draw()
+  if $("##{html_id(gb_id)}").length == 0
+    $.ajax "https://www.googleapis.com/books/v1/volumes/#{gb_id}?key=#{GOOGLE_BOOKS_API_KEY}",
+      type: 'GET'
+      cache: true
+      dataType: 'json'
+      crossDomain: true
+      error: (jqXHR, textStatus, errorThrown) ->
+        $('#results').append($('<div/>',{class: 'alert alert-danger', role: 'alert'}).text("Error in Google Books AJAX call for identifier #{gb_id}"))
+        console.log jqXHR
+        console.log errorThrown
+        console.log "AJAX Error: #{textStatus}"
+      success: (data) ->
+        console.log data
+        if $("##{html_id(gb_id)}").length == 0
+          $('#table').DataTable().row.add([
+            "<a id='#{html_id(gb_id)}' href='#{gb_url(gb_id)}' target='_blank'>#{gb_id}</a>",
+            data.volumeInfo.title,
+            data.volumeInfo.publishedDate,
+            '',
+            data.volumeInfo.pageCount || '',
+            score
+          ]).draw(false)
+          $('#table').DataTable().columns.adjust().draw()
 
 
 process_gb = (identifier_string) ->

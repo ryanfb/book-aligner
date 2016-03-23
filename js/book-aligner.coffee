@@ -1,12 +1,12 @@
 ---
 ---
 
-FUSION_TABLES_URI = 'https://www.googleapis.com/fusiontables/v1'
+FUSION_TABLES_URI = 'https://www.googleapis.com/fusiontables/v2'
 
 GOOGLE_BOOKS_API_KEY = 'AIzaSyDkGJOl5EEBahhn1J2kS70FmiRR2uwpFIY'
 GOOGLE_API_KEY = 'AIzaSyBoQNYbbHb-MEGa4_oq83_JCLt9cKfd4vg'
 # Fusion Tables IDs of the HT-IA indices output from merge-results.rb
-HT_IA_TABLE_IDS = ['1ktMz3RDdYEpUu7RTzybkTNCjGg_Vxv0RV1NdC6IL']
+HT_IA_TABLE_IDS = ['1Y5uDWMjUzrk6z_8l_C1NzLq9yUSpgS5n473N9dXL','1JNR9hJogOdwsYrNRH0Au_XlLELFViqVXhUg0pgBh']
 # Fusion Tables ID of the IA-GB index output as ia-goog-index.csv
 IA_GB_TABLE_ID = '1Tg0cm8gXBUwsBGx53GwGhHYiPpt_6YzG-HrR6Ywl'
 
@@ -30,7 +30,8 @@ fusion_tables_query = (query, callback, error_callback) ->
         dataType: 'json'
         crossDomain: true
         error: (jqXHR, textStatus, errorThrown) ->
-          $('#results').append($('<div/>',{class: 'alert alert-danger', role: 'alert'}).text('Error in Fusion Tables AJAX call.'))
+          $('#results').append($('<div/>',{class: 'alert alert-danger', role: 'alert'}).text("Error in Fusion Tables AJAX call."))
+          console.log jqXHR
           console.log errorThrown
           console.log "AJAX Error: #{textStatus}"
           error_callback() if error_callback?
@@ -74,7 +75,7 @@ process_ht = (identifier_string) ->
 
 ht_query = (ht_id, level = 0) ->
   for table_id in HT_IA_TABLE_IDS
-    fusion_tables_query "SELECT ia_identifier,score FROM #{table_id} WHERE ht_identifier = #{fusion_tables_escape(ht_id)} ORDER BY score DESC",
+    fusion_tables_query "SELECT ia_identifier,score FROM #{table_id} WHERE ht_identifier = #{fusion_tables_escape(ht_id)}",
       (data) ->
         if data.rows?
           process_ia_id(row[0],(1 - level) * row[1]) for row in data.rows.reverse()
@@ -125,7 +126,7 @@ process_ia = (identifier_string) ->
 
 ia_query = (ia_id, level = 0) ->
   for table_id in HT_IA_TABLE_IDS
-    fusion_tables_query "SELECT ht_identifier,score FROM #{table_id} WHERE ia_identifier = #{fusion_tables_escape(ia_id)} ORDER BY score DESC",
+    fusion_tables_query "SELECT ht_identifier,score FROM #{table_id} WHERE ia_identifier = #{fusion_tables_escape(ia_id)}",
       (data) ->
         if data.rows?
           process_ht_id(row[0],(1 - level) * row[1]) for row in data.rows.reverse()
@@ -147,6 +148,7 @@ gb_biblio_query = (gb_id, score = 0) ->
     crossDomain: true
     error: (jqXHR, textStatus, errorThrown) ->
       $('#results').append($('<div/>',{class: 'alert alert-danger', role: 'alert'}).text("Error in Google Books AJAX call for identifier #{gb_id}"))
+      console.log jqXHR
       console.log errorThrown
       console.log "AJAX Error: #{textStatus}"
     success: (data) ->

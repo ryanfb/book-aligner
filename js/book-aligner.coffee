@@ -215,4 +215,7 @@ find_matches = ->
 
 $(document).ready ->
   console.log('ready')
+  $('#loadingDiv').hide()
+  $(document).ajaxStart -> $('#loadingDiv').show()
+  $(document).ajaxStop -> $('#loadingDiv').hide()
   $('#identifier_form').submit(find_matches)

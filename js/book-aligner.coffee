@@ -92,7 +92,7 @@ ht_url = (ht_id) ->
 
 oclc_href = (oclc_id) ->
   if oclc_id?
-    "<a href='http://www.worldcat.org/oclc/#{oclc_id}'>#{oclc_id}</a>"
+    "<a target='_blank' href='http://www.worldcat.org/oclc/#{oclc_id}'>#{oclc_id}</a>"
 
 process_ht_id = (ht_id, score = 0) ->
   ht_biblio_query(ht_id, score)

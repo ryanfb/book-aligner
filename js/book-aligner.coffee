@@ -65,6 +65,7 @@ ht_biblio_query = (ht_id, score = 0) ->
             _.values(data.records)[0].publishDates[0],
             ht_object.enumcron || '',
             null,
+            oclc_href(_.values(data.records)[0].oclcs[0]),
             score
           ]).draw(false)
           $('#table').DataTable().columns.adjust().draw()
@@ -88,6 +89,10 @@ ht_query = (ht_id, level = 0) ->
 
 ht_url = (ht_id) ->
   "https://babel.hathitrust.org/cgi/pt?id=#{ht_id}"
+
+oclc_href = (oclc_id) ->
+  if oclc_id?
+    "<a href='http://www.worldcat.org/oclc/#{oclc_id}'>#{oclc_id}</a>"
 
 process_ht_id = (ht_id, score = 0) ->
   ht_biblio_query(ht_id, score)
@@ -114,6 +119,7 @@ ia_biblio_query = (ia_id, score = 0) ->
             data.metadata.year || '',
             data.metadata.volume || '',
             data.metadata.imagecount || '',
+            oclc_href(data.metadata['oclc-id']),
             score
           ]).draw(false)
           $('#table').DataTable().columns.adjust().draw()
@@ -168,6 +174,7 @@ gb_biblio_query = (gb_id, score = 0) ->
             data.volumeInfo.publishedDate,
             '',
             data.volumeInfo.pageCount || '',
+            null,
             score
           ]).draw(false)
           $('#table').DataTable().columns.adjust().draw()
@@ -201,7 +208,7 @@ process_identifier = (identifier_string) ->
   $('#table').DataTable({
     paging: false
     autoWidth: true
-    order: [[ 6, "desc" ]]
+    order: [[ 7, "desc" ]]
     columns: [
       { title: "", orderable: false }
       { title: "Identifier" }
@@ -209,6 +216,7 @@ process_identifier = (identifier_string) ->
       { title: "Year" }
       { title: "Volume" }
       { title: "Pages" }
+      { title: "OCLC" }
       { title: "Score" }
     ]
   })

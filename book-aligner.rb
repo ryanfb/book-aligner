@@ -4,6 +4,7 @@ Encoding.default_external = Encoding::UTF_8
 Encoding.default_internal = Encoding::UTF_8
 
 require 'csv'
+require 'library_stdnums'
 
 internet_archive_csv, hathifile_tsv = ARGV
 
@@ -45,6 +46,7 @@ end
 def check_identifiers(ht_ia_match_scores, standard_identifiers, ht_identifier, identifier_string, standard_identifier_key)
   if !identifier_string.nil? && !identifier_string.empty?
     identifier_string.split(',').each do |identifier_to_check|
+      identifier_to_check = normalize_identifier(identifier_to_check, standard_identifier_key)
       if standard_identifiers[standard_identifier_key].has_key?(identifier_to_check)
         standard_identifiers[standard_identifier_key][identifier_to_check].each do |ia_identifier|
           ht_ia_match_scores[ht_identifier] ||= {}
@@ -56,6 +58,29 @@ def check_identifiers(ht_ia_match_scores, standard_identifiers, ht_identifier, i
   end
 end
 
+def normalize_identifier(identifier, identifier_type)
+  normalized_identifier = nil
+  case identifier_type
+  when 'oclc-id'
+    return identifier
+  when 'isbn'
+    normalized_identifier = StdNum::ISBN.normalize(identifier)
+  when 'issn'
+    normalized_identifier = StdNum::ISSN.normalize(identifier)
+  when 'lccn'
+    normalized_identifier = StdNum::LCCN.normalize(identifier)
+    if normalized_identifier.nil?
+      normalized_identifier = StdNum::LCCN.normalize(identifier.gsub(/\D/,''))
+    end
+  end
+
+  if normalized_identifier.nil? && !identifier.nil? && !identifier.empty?
+  #  $stderr.puts [identifier_type, identifier].join("\t")
+  end
+
+  return normalized_identifier
+end
+
 $stderr.puts "Parsing Internet Archive metadata..."
 CSV.foreach(internet_archive_csv, :headers => true) do |row|
   ia_volumes[row['identifier']] = row['volume']
@@ -65,11 +90,12 @@ CSV.foreach(internet_archive_csv, :headers => true) do |row|
   if !row['date'].nil? && !row['date'].empty?
     ia_date[row['identifier']] = /^(\d+)/.match(row['date']).captures.first
   end
-  %w{oclc-id lccn issn isbn}.each do |identifier_type|
-    if !row[identifier_type].nil? && !row[identifier_type].empty?
+  %w{oclc-id lccn isbn}.each do |identifier_type|
+    normalized_identifier = normalize_identifier(row[identifier_type], identifier_type)
+    if !normalized_identifier.nil? && !normalized_identifier.empty?
       identifiers[identifier_type] ||= {}
-      identifiers[identifier_type][row[identifier_type]] ||= []
-      identifiers[identifier_type][row[identifier_type]] << row['identifier']
+      identifiers[identifier_type][normalized_identifier] ||= []
+      identifiers[identifier_type][normalized_identifier] << row['identifier']
     end
   end
 end
@@ -80,7 +106,7 @@ CSV.foreach(hathifile_tsv, :headers => false, :col_sep => "\t", :quote_char => "
   hathi_volumes[row[0]] = row[4]
   check_identifiers(ht_ia_match_scores, identifiers, row[0], row[7], 'oclc-id')
   check_identifiers(ht_ia_match_scores, identifiers, row[0], row[8], 'isbn')
-  check_identifiers(ht_ia_match_scores, identifiers, row[0], row[9], 'issn')
+  # check_identifiers(ht_ia_match_scores, identifiers, row[0], row[9], 'issn')
   check_identifiers(ht_ia_match_scores, identifiers, row[0], row[10], 'lccn')
 end
 

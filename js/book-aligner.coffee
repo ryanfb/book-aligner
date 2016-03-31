@@ -116,7 +116,7 @@ ia_biblio_query = (ia_id, score = 0) ->
             '<img src="http://archive.org/favicon.ico" width="16" height="16"/>',
             "<a id='#{html_id(ia_id)}' href='#{ia_url(ia_id)}' target='_blank'>#{ia_id}</a>",
             data.metadata.title,
-            data.metadata.year || '',
+            data.metadata.year || data.metadata.date || '',
             data.metadata.volume || '',
             data.metadata.imagecount || '',
             oclc_href(data.metadata['oclc-id']) || '',

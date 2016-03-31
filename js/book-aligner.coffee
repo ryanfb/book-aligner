@@ -64,8 +64,8 @@ ht_biblio_query = (ht_id, score = 0) ->
             _.values(data.records)[0].titles[0],
             _.values(data.records)[0].publishDates[0],
             ht_object.enumcron || '',
-            null,
-            oclc_href(_.values(data.records)[0].oclcs[0]),
+            '',
+            oclc_href(_.values(data.records)[0].oclcs[0]) || '',
             score
           ]).draw(false)
           $('#table').DataTable().columns.adjust().draw()
@@ -119,7 +119,7 @@ ia_biblio_query = (ia_id, score = 0) ->
             data.metadata.year || '',
             data.metadata.volume || '',
             data.metadata.imagecount || '',
-            oclc_href(data.metadata['oclc-id']),
+            oclc_href(data.metadata['oclc-id']) || '',
             score
           ]).draw(false)
           $('#table').DataTable().columns.adjust().draw()
@@ -174,7 +174,7 @@ gb_biblio_query = (gb_id, score = 0) ->
             data.volumeInfo.publishedDate,
             '',
             data.volumeInfo.pageCount || '',
-            null,
+            '',
             score
           ]).draw(false)
           $('#table').DataTable().columns.adjust().draw()

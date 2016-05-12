@@ -44,7 +44,7 @@ fusion_tables_query = (query, callback, error_callback) ->
 
 ht_biblio_query = (ht_id, score = 0) ->
   if $("##{html_id(ht_id)}").length == 0
-    $.ajax "http://catalog.hathitrust.org/api/volumes/brief/htid/#{ht_id}.json",
+    $.ajax "https://catalog.hathitrust.org/api/volumes/brief/htid/#{ht_id}.json",
       type: 'GET'
       cache: true
       dataType: 'json'

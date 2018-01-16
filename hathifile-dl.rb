@@ -1,10 +1,11 @@
 #!/usr/bin/env ruby
+# Downloads and assembles a fully updated Hathifile from: https://www.hathitrust.org/hathifiles
+# Usage: ./hathifile-dl.rb > hathifile.tsv
 
 require 'json'
 require 'time'
 require 'uri'
 require 'net/http'
-require 'pp'
 
 def download(hathifile)
   unless File.exist?(hathifile['filename'])

@@ -7,7 +7,7 @@ alignment-unique.csv: alignment.csv
 	sort $^ | uniq > $@
 
 alignment.csv: ia-oclc-lccn-issn-isbn-vol-pub-title.csv hathifile.tsv book-aligner.rb
-	./book-aligner.rb ia-oclc-lccn-issn-isbn-vol-pub-title.csv hathifile.tsv > $@
+	bundle exec ./book-aligner.rb ia-oclc-lccn-issn-isbn-vol-pub-title.csv hathifile.tsv > $@
 
 titles-alignment.csv: ia-oclc-lccn-issn-isbn-vol-pub-title.csv hathifile.tsv book-aligner-titles.rb
 	./book-aligner-titles.rb ia-oclc-lccn-issn-isbn-vol-pub-title.csv hathifile.tsv > $@
@@ -35,6 +35,9 @@ ia-google-index.csv: ia-goog.csv
 
 ia-title.csv:
 	curl -o $@ 'https://archive.org/advancedsearch.php?q=mediatype%3Atexts&fl%5B%5D=identifier&fl%5B%5D=title&fl%5B%5D=source&sort%5B%5D=&rows=9999999&page=1&output=csv&save=yes'
+
+ia-lang.csv:
+	curl -o $@ 'https://archive.org/advancedsearch.php?q=mediatype%3Atexts&fl%5B%5D=identifier&fl%5B%5D=language&sort%5B%5D=&rows=9999999&page=1&output=csv&save=yes'
 
 ia-oclc-lccn-issn-isbn-vol-pub-goog.csv: ia-oclc-lccn-issn-isbn-vol-pub.csv ia-goog.csv
 	csvjoin -c "identifier" $^ > $@

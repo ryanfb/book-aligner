@@ -13,7 +13,6 @@ def download(hathifile)
   end
 end
 
-# hathifiles = JSON.parse(Net::HTTP.get(URI('https://www.hathitrust.org/filebrowser/download/244651')))
 hathifiles = JSON.parse(Net::HTTP.get(URI('https://www.hathitrust.org/sites/www.hathitrust.org/files/hathifiles/hathi_file_list.json')))
 
 latest_full_hathifile = hathifiles.select{|h| h['full']}.sort_by{|h| Time.parse(h['created'])}.last

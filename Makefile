@@ -43,7 +43,7 @@ ia-oclc-lccn-issn-isbn-vol-pub-goog.csv: ia-oclc-lccn-issn-isbn-vol-pub.csv ia-g
 	csvjoin -c "identifier" $^ > $@
 
 ia-oclc-lccn-issn-isbn-vol-pub-title.csv:
-	curl -o $@ 'https://archive.org/advancedsearch.php?q=mediatype%3Atexts&fl%5B%5D=identifier&fl%5B%5D=oclc-id&fl%5B%5D=lccn&fl%5B%5D=issn&fl%5B%5D=isbn&fl%5B%5D=volume&fl%5B%5D=date&fl%5B%5D=year&fl%5B%5D=title&sort%5B%5D=&rows=9999999&page=1&output=csv&save=yes'
+	curl -o $@ 'https://archive.org/advancedsearch.php?q=mediatype%3Atexts%20AND%20%28oclc-id:%5B%2A%20TO%20%2A%5D%20OR%20lccn:%5B%2A%20TO%20%2A%5D%20OR%20issn:%5B%2A%20TO%20%2A%5D%20OR%20isbn:%5B%2A%20TO%20%2A%5D%20OR%20title:%5B%2A%20TO%20%2A%5D%29&fl%5B%5D=identifier&fl%5B%5D=oclc-id&fl%5B%5D=lccn&fl%5B%5D=issn&fl%5B%5D=isbn&fl%5B%5D=volume&fl%5B%5D=date&fl%5B%5D=year&fl%5B%5D=title&sort%5B%5D=&rows=99999999&page=1&output=csv&save=yes'
 
 clean:
 	rm -fv alignment.csv alignment-unique.csv hathifile.tsv ia-oclc-lccn-issn-isbn-vol-pub-title.csv ia-goog.csv ia-google-index.csv alignment-filtered-joined-titles.csv alignment-filtered-joined-ids.csv alignment-filtered.csv titles-alignment.csv

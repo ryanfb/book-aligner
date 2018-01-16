@@ -2,3 +2,4 @@
 *.tsv
 _site
 .jekyll-metadata
+*.txt.gz

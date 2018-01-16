@@ -28,7 +28,7 @@ alignment-filtered-joined-titles.csv alignment-filtered-joined-ids.csv: alignmen
 	./merge-results.rb alignment-filtered.csv titles-alignment.csv alignment-filtered-joined-titles.csv alignment-filtered-joined-ids.csv
 
 ia-goog.csv:
-	curl -o $@ 'https://archive.org/advancedsearch.php?q=mediatype%3Atexts&fl%5B%5D=identifier&fl%5B%5D=google-id&fl%5B%5D=source&sort%5B%5D=&rows=9999999&page=1&output=csv&save=yes'
+	curl -o $@ 'https://archive.org/advancedsearch.php?q=mediatype%3Atexts%20AND%20%28google-id:%5B%2A%20TO%20%2A%5D%20OR%20source:%5B%2A%20TO%20%2A%5D%29&fl%5B%5D=identifier&fl%5B%5D=google-id&fl%5B%5D=source&sort%5B%5D=&rows=9999999&page=1&output=csv&save=yes'
 
 ia-google-index.csv: ia-goog.csv
 	grep books.google $^ | cut -d, -f1,1 -f3,3 | gsed -r -e 's/https?\:\/\/books\.google\..+\/books\?id=//' -e 's/&.*"/"/' | grep -v -e '""' -e '"http:' > $@

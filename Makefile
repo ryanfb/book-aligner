@@ -1,4 +1,4 @@
-all: alignment-unique.csv alignment-filtered.csv alignment-filtered-joined-titles.csv alignment-filtered-joined-ids.csv
+all: alignment-unique.csv alignment-filtered.csv alignment-filtered-joined-titles.csv alignment-filtered-joined-ids.csv ia-google-index.csv
 
 alignment-filtered.csv: alignment.csv
 	grep -v ',[123]$$' $^ > $@
@@ -46,4 +46,4 @@ ia-oclc-lccn-issn-isbn-vol-pub-title.csv:
 	curl -o $@ 'https://archive.org/advancedsearch.php?q=mediatype%3Atexts&fl%5B%5D=identifier&fl%5B%5D=oclc-id&fl%5B%5D=lccn&fl%5B%5D=issn&fl%5B%5D=isbn&fl%5B%5D=volume&fl%5B%5D=date&fl%5B%5D=year&fl%5B%5D=title&sort%5B%5D=&rows=9999999&page=1&output=csv&save=yes'
 
 clean:
-	rm -fv alignment.csv alignment-unique.csv hathifile.tsv ia-oclc-lccn-issn-isbn-vol-pub-title.csv
+	rm -fv alignment.csv alignment-unique.csv hathifile.tsv ia-oclc-lccn-issn-isbn-vol-pub-title.csv ia-goog.csv ia-google-index.csv alignment-filtered-joined-titles.csv alignment-filtered-joined-ids.csv alignment-filtered.csv titles-alignment.csv

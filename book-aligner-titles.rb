@@ -65,7 +65,10 @@ CSV.foreach(internet_archive_csv, :headers => true) do |row|
     ia_year[row['identifier']] = row['year']
   end
   if !row['date'].nil? && !row['date'].empty?
-    ia_date[row['identifier']] = /^(\d+)/.match(row['date']).captures.first
+    date_match = /^(\d+)/.match(row['date'])
+    if date_match
+      ia_date[row['identifier']] = date_match.captures.first
+    end
   end
   ia_volumes[row['identifier']] = row['volume']
 end

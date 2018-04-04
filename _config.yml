@@ -1,4 +1,4 @@
 baseurl: /book-aligner
 exclude: ['*.csv', '*.tsv']
-gems:
+plugins:
  - jekyll-coffeescript

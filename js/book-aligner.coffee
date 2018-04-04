@@ -13,6 +13,7 @@ IA_GB_TABLE_ID = '1Tg0cm8gXBUwsBGx53GwGhHYiPpt_6YzG-HrR6Ywl'
 HT_REGEX = /^https?:\/\/babel\.hathitrust\.org\/cgi\/pt\?id=(.+)/
 IA_REGEX = /^https?:\/\/archive\.org\/details\/(.+)/
 GB_REGEX = /^https?:\/\/books\.google\.com\/books\?id=(.+)/
+HDL_REGEX = /^https?:\/\/hdl\.handle\.net\/2027\/(.+)/
 
 html_id = (input) ->
   input.replace(/[\/:$.,'-]/g,'_')
@@ -74,6 +75,13 @@ ht_biblio_query = (ht_id, score = 0) ->
 process_ht = (identifier_string) ->
   console.log 'process_ht'
   match = identifier_string.match(HT_REGEX)
+  ht_id = match[1].split(';')[0]
+  process_ht_id(ht_id, 100)
+  ht_query(ht_id)
+
+process_hdl = (identifier_string) ->
+  console.log 'process_hdl'
+  match = identifier_string.match(HDL_REGEX)
   ht_id = match[1].split(';')[0]
   process_ht_id(ht_id, 100)
   ht_query(ht_id)
@@ -222,6 +230,7 @@ process_identifier = (identifier_string) ->
   })
   switch
     when identifier_string.match(HT_REGEX) then process_ht(identifier_string)
+    when identifier_string.match(HDL_REGEX) then process_hdl(identifier_string)
     when identifier_string.match(IA_REGEX) then process_ia(identifier_string)
     when identifier_string.match(GB_REGEX) then process_gb(identifier_string)
     else $('#results').prepend($('<p/>').text('Unsupported identifier string.'))

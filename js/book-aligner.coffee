@@ -11,9 +11,10 @@ HT_IA_TABLE_IDS = ['1Y5uDWMjUzrk6z_8l_C1NzLq9yUSpgS5n473N9dXL','1JNR9hJogOdwsYrN
 IA_GB_TABLE_ID = '1Tg0cm8gXBUwsBGx53GwGhHYiPpt_6YzG-HrR6Ywl'
 
 HT_REGEX = /^https?:\/\/babel\.hathitrust\.org\/cgi\/pt\?id=(.+)/
-IA_REGEX = /^https?:\/\/archive\.org\/details\/(.+)/
+IA_REGEX = /^https?:\/\/archive\.org\/details\/(.+)\/?/
 GB_REGEX = /^https?:\/\/books\.google\.com\/books\?id=(.+)/
-HDL_REGEX = /^https?:\/\/hdl\.handle\.net\/2027\/(.+)/
+HDL_REGEX = /^https?:\/\/hdl\.handle\.net\/2027\/(.+)\/?/
+HT_CATALOG_REGEX = /^https?:\/\/catalog\.hathitrust\.org\/Record\/(\d{9})\/?/
 
 html_id = (input) ->
   input.replace(/[\/:$.,'-]/g,'_')
@@ -71,6 +72,27 @@ ht_biblio_query = (ht_id, score = 0) ->
           ]).draw(false)
           $('#table').DataTable().columns.adjust().draw()
           # (Original from #{ht_object.orig})
+
+process_ht_catalog = (identifier_string) ->
+  console.log 'process_ht_catalog'
+  match = identifier_string.match(HT_CATALOG_REGEX)
+  ht_record_id = match[1]
+  $.ajax "https://catalog.hathitrust.org/api/volumes/brief/recordnumber/#{ht_record_id}.json",
+    type: 'GET'
+    cache: true
+    dataType: 'json'
+    crossDomain: true
+    error: (jqXHR, textStatus, errorThrown) ->
+      $('#results').append($('<div/>',{class: 'alert alert-danger', role: 'alert'}).text('Error in HathiTrust AJAX call.'))
+      console.log errorThrown
+      console.log "AJAX Error: #{textStatus}"
+    success: (data) ->
+      console.log data
+      ht_ids = (item.htid for item in data.items) # _.map(data.items, (item) -> item.htid)
+      console.log(ht_ids)
+      for ht_id in ht_ids
+        process_ht_id(ht_id, 100)
+        ht_query(ht_id)
 
 process_ht = (identifier_string) ->
   console.log 'process_ht'
@@ -230,6 +252,7 @@ process_identifier = (identifier_string) ->
   })
   switch
     when identifier_string.match(HT_REGEX) then process_ht(identifier_string)
+    when identifier_string.match(HT_CATALOG_REGEX) then process_ht_catalog(identifier_string)
     when identifier_string.match(HDL_REGEX) then process_hdl(identifier_string)
     when identifier_string.match(IA_REGEX) then process_ia(identifier_string)
     when identifier_string.match(GB_REGEX) then process_gb(identifier_string)

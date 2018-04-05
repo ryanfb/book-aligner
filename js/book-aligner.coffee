@@ -2,6 +2,7 @@
 ---
 
 FUSION_TABLES_URI = 'https://www.googleapis.com/fusiontables/v2'
+GOOGLE_BOOKS_URI = 'https://www.googleapis.com/books/v1/volumes'
 
 GOOGLE_BOOKS_API_KEY = 'AIzaSyDkGJOl5EEBahhn1J2kS70FmiRR2uwpFIY'
 GOOGLE_API_KEY = 'AIzaSyBoQNYbbHb-MEGa4_oq83_JCLt9cKfd4vg'
@@ -15,6 +16,8 @@ IA_REGEX = /^https?:\/\/archive\.org\/details\/(.+)\/?/
 GB_REGEX = /^https?:\/\/books\.google\.com\/books\?id=(.+)/
 HDL_REGEX = /^https?:\/\/hdl\.handle\.net\/2027\/(.+)\/?/
 HT_CATALOG_REGEX = /^https?:\/\/catalog\.hathitrust\.org\/Record\/(\d{9})\/?/
+
+QUERIED_OCLC_IDS = []
 
 html_id = (input) ->
   input.replace(/[\/:$.,'-]/g,'_')
@@ -122,6 +125,7 @@ ht_url = (ht_id) ->
 
 oclc_href = (oclc_id) ->
   if oclc_id?
+    oclc_query(oclc_id)
     "<a target='_blank' href='http://www.worldcat.org/oclc/#{oclc_id}'>#{oclc_id}</a>"
 
 process_ht_id = (ht_id, score = 0) ->
@@ -182,9 +186,31 @@ process_ia_id = (ia_id, score = 0) ->
   ia_biblio_query(ia_id, score)
   console.log ia_id
 
+oclc_query = (oclc_id, score = 0) ->
+  if oclc_id not in QUERIED_OCLC_IDS
+    console.log "oclc_query: #{oclc_id}"
+    QUERIED_OCLC_IDS.push oclc_id
+    $.ajax "#{GOOGLE_BOOKS_URI}?q=oclc:#{oclc_id}&key=#{GOOGLE_BOOKS_API_KEY}",
+      type: 'GET'
+      cache: true
+      dataType: 'json'
+      crossDomain: true
+      error: (jqXHR, textStatus, errorThrown) ->
+        $('#results').append($('<div/>',{class: 'alert alert-danger', role: 'alert'}).text("Error in Google Books AJAX call for identifier #{gb_id}"))
+        console.log jqXHR
+        console.log errorThrown
+        console.log "AJAX Error: #{textStatus}"
+      success: (data) ->
+        console.log "oclc_query #{oclc_id} result:"
+        console.log data
+        if data and data.items and (data.items.length > 0)
+          for item in data.items
+            process_gb_id(item.id, score)
+            gb_query(item.id)
+
 gb_biblio_query = (gb_id, score = 0) ->
   if $("##{html_id(gb_id)}").length == 0
-    $.ajax "https://www.googleapis.com/books/v1/volumes/#{gb_id}?key=#{GOOGLE_BOOKS_API_KEY}",
+    $.ajax "#{GOOGLE_BOOKS_URI}/#{gb_id}?key=#{GOOGLE_BOOKS_API_KEY}",
       type: 'GET'
       cache: true
       dataType: 'json'
@@ -209,7 +235,6 @@ gb_biblio_query = (gb_id, score = 0) ->
           ]).draw(false)
           $('#table').DataTable().columns.adjust().draw()
 
-
 process_gb = (identifier_string) ->
   console.log 'process_gb'
   match = identifier_string.match(GB_REGEX)
@@ -233,6 +258,7 @@ process_gb_id = (gb_id, score = 0) ->
   console.log gb_id
 
 process_identifier = (identifier_string) ->
+  QUERIED_OCLC_IDS = []
   $('#results').empty()
   $('#results').append($('<table/>',{id: 'table', class: 'display', cellspacing: 0, width: '100%'}))
   $('#table').DataTable({

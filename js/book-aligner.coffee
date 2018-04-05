@@ -18,6 +18,7 @@ HDL_REGEX = /^https?:\/\/hdl\.handle\.net\/2027\/(.+)\/?/
 HT_CATALOG_REGEX = /^https?:\/\/catalog\.hathitrust\.org\/Record\/(\d{9})\/?/
 
 QUERIED_OCLC_IDS = []
+QUERIED_LCCN_IDS = []
 
 html_id = (input) ->
   input.replace(/[\/:$.,'-]/g,'_')
@@ -75,6 +76,9 @@ ht_biblio_query = (ht_id, score = 0) ->
           ]).draw(false)
           $('#table').DataTable().columns.adjust().draw()
           # (Original from #{ht_object.orig})
+          lccns = _.values(data.records)[0].lccns
+          if lccns and (lccns.length > 0)
+            lccn_query(lccn_id) for lccn_id in lccns
 
 process_ht_catalog = (identifier_string) ->
   console.log 'process_ht_catalog'
@@ -186,6 +190,28 @@ process_ia_id = (ia_id, score = 0) ->
   ia_biblio_query(ia_id, score)
   console.log ia_id
 
+lccn_query = (lccn_id, score = 0) ->
+  if lccn_id not in QUERIED_LCCN_IDS
+    console.log "lccn_query: #{lccn_id}"
+    QUERIED_LCCN_IDS.push lccn_id
+    $.ajax "#{GOOGLE_BOOKS_URI}?q=lccn:#{lccn_id}&key=#{GOOGLE_BOOKS_API_KEY}",
+      type: 'GET'
+      cache: true
+      dataType: 'json'
+      crossDomain: true
+      error: (jqXHR, textStatus, errorThrown) ->
+        $('#results').append($('<div/>',{class: 'alert alert-danger', role: 'alert'}).text("Error in Google Books AJAX call for identifier #{gb_id}"))
+        console.log jqXHR
+        console.log errorThrown
+        console.log "AJAX Error: #{textStatus}"
+      success: (data) ->
+        console.log "lccn_query #{lccn_id} result:"
+        console.log data
+        if data and data.items and (data.items.length > 0)
+          for item in data.items
+            process_gb_id(item.id, score)
+            gb_query(item.id)
+
 oclc_query = (oclc_id, score = 0) ->
   if oclc_id not in QUERIED_OCLC_IDS
     console.log "oclc_query: #{oclc_id}"
@@ -259,6 +285,7 @@ process_gb_id = (gb_id, score = 0) ->
 
 process_identifier = (identifier_string) ->
   QUERIED_OCLC_IDS = []
+  QUERIED_LCCN_IDS = []
   $('#results').empty()
   $('#results').append($('<table/>',{id: 'table', class: 'display', cellspacing: 0, width: '100%'}))
   $('#table').DataTable({

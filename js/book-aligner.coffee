@@ -15,7 +15,7 @@ HT_REGEX = /^https?:\/\/babel\.hathitrust\.org\/cgi\/pt\?id=(.+)/
 IA_REGEX = /^https?:\/\/archive\.org\/details\/(.+)\/?/
 GB_REGEX = /^https?:\/\/books\.google\.com\/books\?id=(.+)/
 HDL_REGEX = /^https?:\/\/hdl\.handle\.net\/2027\/(.+)\/?/
-HT_CATALOG_REGEX = /^https?:\/\/catalog\.hathitrust\.org\/Record\/(\d{9})\/?/
+HT_CATALOG_REGEX = /^https?:\/\/catalog\.hathitrust\.org\/Record\/(\d{9})/
 
 QUERIED_OCLC_IDS = []
 QUERIED_LCCN_IDS = []

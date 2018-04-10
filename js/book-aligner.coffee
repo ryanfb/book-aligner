@@ -166,6 +166,8 @@ ia_biblio_query = (ia_id, score = 0) ->
             match = data.metadata.source.match(GB_REGEX)
             gb_id = match[1].split('&')[0]
             process_gb_id(gb_id, score)
+          if data.metadata.lccn?
+            lccn_query(data.metadata.lccn)
 
 process_ia = (identifier_string) ->
   console.log 'process_ia'

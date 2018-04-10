@@ -224,12 +224,25 @@ industry_identifier_query = (identifier_type, identifier, score = 0) ->
         console.log errorThrown
         console.log "AJAX Error: #{textStatus}"
       success: (data) ->
-        console.log "#{identifier_type} query #{identifier} result:"
+        console.log "#{identifier_type} query #{identifier} Google Books result:"
         console.log data
         if data and data.items and (data.items.length > 0)
           for item in data.items
             process_gb_id(item.id, score)
             gb_query(item.id)
+    $.ajax "https://catalog.hathitrust.org/api/volumes/brief/json/#{identifier_type}:#{identifier}",
+      type: 'GET'
+      cache: true
+      dataType: 'json'
+      crossDomain: true
+      error: (jqXHR, textStatus, errorThrown) ->
+        $('#results').append($('<div/>',{class: 'alert alert-danger', role: 'alert'}).text('Error in HathiTrust AJAX call.'))
+        console.log errorThrown
+        console.log "AJAX Error: #{textStatus}"
+      success: (data) ->
+        console.log "#{identifier_type} query #{identifier} HathiTrust result:"
+        console.log data
+        ht_biblio_query(item.htid) for item in _.values(data)[0].items
 
 gb_biblio_query = (gb_id, score = 0) ->
   if $("##{html_id(gb_id)}").length == 0
@@ -257,6 +270,10 @@ gb_biblio_query = (gb_id, score = 0) ->
             score
           ]).draw(false)
           $('#table').DataTable().columns.adjust().draw()
+          if data.volumeInfo.industryIdentifiers? and (data.volumeInfo.industryIdentifiers.length > 0)
+            for industry_identifier in data.volumeInfo.industryIdentifiers
+              if industry_identifier.type == 'ISBN_13'
+                industry_identifier_query('isbn', industry_identifier.identifier)
 
 process_gb = (identifier_string) ->
   console.log 'process_gb'

@@ -17,8 +17,7 @@ GB_REGEX = /^https?:\/\/books\.google\.com\/books\?id=(.+)/
 HDL_REGEX = /^https?:\/\/hdl\.handle\.net\/2027\/(.+)\/?/
 HT_CATALOG_REGEX = /^https?:\/\/catalog\.hathitrust\.org\/Record\/(\d{9})/
 
-QUERIED_OCLC_IDS = []
-QUERIED_LCCN_IDS = []
+QUERIED_IDS = {}
 
 html_id = (input) ->
   input.replace(/[\/:$.,'-]/g,'_')
@@ -193,9 +192,9 @@ process_ia_id = (ia_id, score = 0) ->
   console.log ia_id
 
 lccn_query = (lccn_id, score = 0) ->
-  if lccn_id not in QUERIED_LCCN_IDS
+  if lccn_id not in QUERIED_IDS['lccn']
     console.log "lccn_query: #{lccn_id}"
-    QUERIED_LCCN_IDS.push lccn_id
+    QUERIED_IDS['lccn'].push lccn_id
     $.ajax "#{GOOGLE_BOOKS_URI}?q=lccn:#{lccn_id}&key=#{GOOGLE_BOOKS_API_KEY}",
       type: 'GET'
       cache: true
@@ -215,9 +214,9 @@ lccn_query = (lccn_id, score = 0) ->
             gb_query(item.id)
 
 oclc_query = (oclc_id, score = 0) ->
-  if oclc_id not in QUERIED_OCLC_IDS
+  if oclc_id not in QUERIED_IDS['oclc']
     console.log "oclc_query: #{oclc_id}"
-    QUERIED_OCLC_IDS.push oclc_id
+    QUERIED_IDS['oclc'].push oclc_id
     $.ajax "#{GOOGLE_BOOKS_URI}?q=oclc:#{oclc_id}&key=#{GOOGLE_BOOKS_API_KEY}",
       type: 'GET'
       cache: true
@@ -285,9 +284,15 @@ process_gb_id = (gb_id, score = 0) ->
   gb_biblio_query(gb_id, score)
   console.log gb_id
 
+reset_queried_ids = ->
+  QUERIED_IDS = {
+    'isbn': [],
+    'oclc': [],
+    'lccn': []
+  }
+
 process_identifier = (identifier_string) ->
-  QUERIED_OCLC_IDS = []
-  QUERIED_LCCN_IDS = []
+  reset_queried_ids()
   $('#results').empty()
   $('#results').append($('<table/>',{id: 'table', class: 'display', cellspacing: 0, width: '100%'}))
   $('#table').DataTable({

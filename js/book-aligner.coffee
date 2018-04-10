@@ -121,13 +121,15 @@ process_hdl = (identifier_string) ->
   ht_query(ht_id)
 
 ht_query = (ht_id, level = 0) ->
-  for table_id in HT_IA_TABLE_IDS
-    fusion_tables_query "SELECT ia_identifier,score FROM #{table_id} WHERE ht_identifier = #{fusion_tables_escape(ht_id)}",
-      (data) ->
-        if data.rows?
-          process_ia_id(row[0],(1 - level) * row[1]) for row in data.rows.reverse()
-          if level == 0
-            ia_query(row[0],1) for row in data.rows.reverse()
+  if ht_id not in QUERIED_IDS['ht']
+    QUERIED_IDS['ht'].push ht_id
+    for table_id in HT_IA_TABLE_IDS
+      fusion_tables_query "SELECT ia_identifier,score FROM #{table_id} WHERE ht_identifier = #{fusion_tables_escape(ht_id)}",
+        (data) ->
+          if data.rows?
+            process_ia_id(row[0],(1 - level) * row[1]) for row in data.rows.reverse()
+            if level == 0
+              ia_query(row[0],1) for row in data.rows.reverse()
 
 ht_url = (ht_id) ->
   "https://babel.hathitrust.org/cgi/pt?id=#{ht_id}"
@@ -190,13 +192,15 @@ process_ia = (identifier_string) ->
   ia_query(ia_id)
 
 ia_query = (ia_id, level = 0) ->
-  for table_id in HT_IA_TABLE_IDS
-    fusion_tables_query "SELECT ht_identifier,score FROM #{table_id} WHERE ia_identifier = #{fusion_tables_escape(ia_id)}",
-      (data) ->
-        if data.rows?
-          process_ht_id(row[0],(1 - level) * row[1]) for row in data.rows.reverse()
-          if level == 0
-            ht_query(row[0], 1) for row in data.rows.reverse()
+  if ia_id not in QUERIED_IDS['ia']
+    QUERIED_IDS['ia'].push ia_id
+    for table_id in HT_IA_TABLE_IDS
+      fusion_tables_query "SELECT ht_identifier,score FROM #{table_id} WHERE ia_identifier = #{fusion_tables_escape(ia_id)}",
+        (data) ->
+          if data.rows?
+            process_ht_id(row[0],(1 - level) * row[1]) for row in data.rows.reverse()
+            if level == 0
+              ht_query(row[0], 1) for row in data.rows.reverse()
 
 ia_url = (ia_id) ->
   "https://archive.org/details/#{ia_id}"
@@ -280,7 +284,9 @@ reset_queried_ids = ->
   QUERIED_IDS = {
     'isbn': [],
     'oclc': [],
-    'lccn': []
+    'lccn': [],
+    'ht': [],
+    'ia': []
   }
 
 process_identifier = (identifier_string) ->

@@ -77,10 +77,10 @@ ht_biblio_query = (ht_id, score = 0) ->
           # (Original from #{ht_object.orig})
           lccns = _.uniq(_.values(data.records)[0].lccns)
           if lccns? and (lccns.length > 0)
-            lccn_query(lccn_id) for lccn_id in lccns
+            industry_identifier_query('lccn', lccn_id) for lccn_id in lccns
           isbns = _.uniq(_.values(data.records)[0].isbns)
           if isbns? and (isbns.length > 0)
-            isbn_query(isbn_id) for isbn_id in isbns
+            industry_identifier_query('isbn', isbn_id) for isbn_id in isbns
 
 process_ht_catalog = (identifier_string) ->
   console.log 'process_ht_catalog'
@@ -131,7 +131,7 @@ ht_url = (ht_id) ->
 
 oclc_href = (oclc_id) ->
   if oclc_id?
-    oclc_query(oclc_id)
+    industry_identifier_query('oclc', oclc_id)
     "<a target='_blank' href='http://www.worldcat.org/oclc/#{oclc_id}'>#{oclc_id}</a>"
 
 process_ht_id = (ht_id, score = 0) ->
@@ -169,7 +169,7 @@ ia_biblio_query = (ia_id, score = 0) ->
             gb_id = match[1].split('&')[0]
             process_gb_id(gb_id, score)
           if data.metadata.lccn?
-            lccn_query(data.metadata.lccn)
+            industry_identifier_query('lccn', data.metadata.lccn)
 
 process_ia = (identifier_string) ->
   console.log 'process_ia'
@@ -194,11 +194,11 @@ process_ia_id = (ia_id, score = 0) ->
   ia_biblio_query(ia_id, score)
   console.log ia_id
 
-isbn_query = (isbn_id, score = 0) ->
-  if isbn_id not in QUERIED_IDS['isbn']
-    console.log "isbn_query: #{isbn_id}"
-    QUERIED_IDS['isbn'].push isbn_id
-    $.ajax "#{GOOGLE_BOOKS_URI}?q=isbn:#{isbn_id}&key=#{GOOGLE_BOOKS_API_KEY}",
+industry_identifier_query = (identifier_type, identifier, score = 0) ->
+  if identifier not in QUERIED_IDS[identifier_type]
+    console.log "#{identifier_type} query: #{identifier}"
+    QUERIED_IDS[identifier_type].push identifier
+    $.ajax "#{GOOGLE_BOOKS_URI}?q=#{identifier_type}:#{identifier}&key=#{GOOGLE_BOOKS_API_KEY}",
       type: 'GET'
       cache: true
       dataType: 'json'
@@ -209,51 +209,7 @@ isbn_query = (isbn_id, score = 0) ->
         console.log errorThrown
         console.log "AJAX Error: #{textStatus}"
       success: (data) ->
-        console.log "isbn_query #{isbn_id} result:"
-        console.log data
-        if data and data.items and (data.items.length > 0)
-          for item in data.items
-            process_gb_id(item.id, score)
-            gb_query(item.id)
-
-lccn_query = (lccn_id, score = 0) ->
-  if lccn_id not in QUERIED_IDS['lccn']
-    console.log "lccn_query: #{lccn_id}"
-    QUERIED_IDS['lccn'].push lccn_id
-    $.ajax "#{GOOGLE_BOOKS_URI}?q=lccn:#{lccn_id}&key=#{GOOGLE_BOOKS_API_KEY}",
-      type: 'GET'
-      cache: true
-      dataType: 'json'
-      crossDomain: true
-      error: (jqXHR, textStatus, errorThrown) ->
-        $('#results').append($('<div/>',{class: 'alert alert-danger', role: 'alert'}).text("Error in Google Books AJAX call for identifier #{gb_id}"))
-        console.log jqXHR
-        console.log errorThrown
-        console.log "AJAX Error: #{textStatus}"
-      success: (data) ->
-        console.log "lccn_query #{lccn_id} result:"
-        console.log data
-        if data and data.items and (data.items.length > 0)
-          for item in data.items
-            process_gb_id(item.id, score)
-            gb_query(item.id)
-
-oclc_query = (oclc_id, score = 0) ->
-  if oclc_id not in QUERIED_IDS['oclc']
-    console.log "oclc_query: #{oclc_id}"
-    QUERIED_IDS['oclc'].push oclc_id
-    $.ajax "#{GOOGLE_BOOKS_URI}?q=oclc:#{oclc_id}&key=#{GOOGLE_BOOKS_API_KEY}",
-      type: 'GET'
-      cache: true
-      dataType: 'json'
-      crossDomain: true
-      error: (jqXHR, textStatus, errorThrown) ->
-        $('#results').append($('<div/>',{class: 'alert alert-danger', role: 'alert'}).text("Error in Google Books AJAX call for identifier #{gb_id}"))
-        console.log jqXHR
-        console.log errorThrown
-        console.log "AJAX Error: #{textStatus}"
-      success: (data) ->
-        console.log "oclc_query #{oclc_id} result:"
+        console.log "#{identifier_type} query #{identifier} result:"
         console.log data
         if data and data.items and (data.items.length > 0)
           for item in data.items

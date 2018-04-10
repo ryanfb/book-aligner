@@ -255,7 +255,7 @@ gb_biblio_query = (gb_id, score = 0) ->
             data.volumeInfo.title,
             data.volumeInfo.publishedDate,
             '',
-            data.volumeInfo.pageCount || '',
+            data.volumeInfo.printedPageCount || data.volumeInfo.pageCount || '',
             '',
             score
           ]).draw(false)

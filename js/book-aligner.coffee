@@ -50,6 +50,7 @@ fusion_tables_query = (query, callback, error_callback) ->
 
 ht_biblio_query = (ht_id, score = 0) ->
   if $("##{html_id(ht_id)}").length == 0
+    ht_query(ht_id)
     $.ajax "https://catalog.hathitrust.org/api/volumes/brief/htid/#{ht_id}.json",
       type: 'GET'
       cache: true
@@ -105,21 +106,18 @@ process_ht_catalog = (identifier_string) ->
       console.log(ht_ids)
       for ht_id in ht_ids
         process_ht_id(ht_id, 100)
-        ht_query(ht_id)
 
 process_ht = (identifier_string) ->
   console.log 'process_ht'
   match = identifier_string.match(HT_REGEX)
   ht_id = match[1].split(';')[0]
   process_ht_id(ht_id, 100)
-  ht_query(ht_id)
 
 process_hdl = (identifier_string) ->
   console.log 'process_hdl'
   match = identifier_string.match(HDL_REGEX)
   ht_id = match[1].split(';')[0]
   process_ht_id(ht_id, 100)
-  ht_query(ht_id)
 
 ht_query = (ht_id, level = 0) ->
   if ht_id not in QUERIED_IDS['ht']
@@ -145,6 +143,7 @@ process_ht_id = (ht_id, score = 0) ->
 
 ia_biblio_query = (ia_id, score = 0) ->
   if $("##{html_id(ia_id)}").length == 0
+    ia_query(ia_id)
     $.ajax "https://archive.org/metadata/#{ia_id}",
       type: 'GET'
       cache: true
@@ -190,7 +189,6 @@ process_ia = (identifier_string, score = 100) ->
   match = identifier_string.match(IA_REGEX)
   ia_id = match[2].split('&')[0]
   process_ia_id(ia_id, score)
-  ia_query(ia_id)
 
 ia_query = (ia_id, level = 0) ->
   if ia_id not in QUERIED_IDS['ia']
@@ -229,8 +227,7 @@ industry_identifier_query = (identifier_type, identifier, score = 0) ->
         console.log data
         if data and data.items and (data.items.length > 0)
           for item in data.items
-            process_gb_id(item.id, score)
-            gb_query(item.id)
+            gb_biblio_query(item.id, score)
     $.ajax "https://catalog.hathitrust.org/api/volumes/brief/json/#{identifier_type}:#{identifier}",
       type: 'GET'
       cache: true
@@ -265,6 +262,7 @@ industry_identifier_query = (identifier_type, identifier, score = 0) ->
 
 gb_biblio_query = (gb_id, score = 0) ->
   if $("##{html_id(gb_id)}").length == 0
+    gb_query(gb_id)
     $.ajax "#{GOOGLE_BOOKS_URI}/#{gb_id}?projection=full&key=#{GOOGLE_BOOKS_API_KEY}",
       type: 'GET'
       cache: true
@@ -299,7 +297,6 @@ process_gb = (identifier_string) ->
   match = identifier_string.match(GB_REGEX)
   gb_id = match[1].split('&')[0]
   process_gb_id(gb_id, 100)
-  gb_query(gb_id)
 
 gb_query = (gb_id, level = 0) ->
   if gb_id not in QUERIED_IDS['gb']

@@ -266,12 +266,14 @@ process_gb = (identifier_string) ->
   gb_query(gb_id)
 
 gb_query = (gb_id, level = 0) ->
-  fusion_tables_query "SELECT ia_identifier FROM #{IA_GB_TABLE_ID} WHERE gb_identifier = #{fusion_tables_escape(gb_id)}",
-    (data) ->
-      if data.rows?
-        process_ia_id(row[0],(1 - level)*100) for row in data.rows.reverse()
-        if level == 0
-          ia_query(row[0],1) for row in data.rows.reverse()
+  if gb_id not in QUERIED_IDS['gb']
+    QUERIED_IDS['gb'].push gb_id
+    fusion_tables_query "SELECT ia_identifier FROM #{IA_GB_TABLE_ID} WHERE gb_identifier = #{fusion_tables_escape(gb_id)}",
+      (data) ->
+        if data.rows?
+          process_ia_id(row[0],(1 - level)*100) for row in data.rows.reverse()
+          if level == 0
+            ia_query(row[0],1) for row in data.rows.reverse()
 
 gb_url = (gb_id) ->
   "https://books.google.com/books?id=#{gb_id}"
@@ -286,6 +288,7 @@ reset_queried_ids = ->
     'oclc': [],
     'lccn': [],
     'ht': [],
+    'gb': [],
     'ia': []
   }
 

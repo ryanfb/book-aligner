@@ -75,9 +75,12 @@ ht_biblio_query = (ht_id, score = 0) ->
           ]).draw(false)
           $('#table').DataTable().columns.adjust().draw()
           # (Original from #{ht_object.orig})
-          lccns = _.values(data.records)[0].lccns
-          if lccns and (lccns.length > 0)
+          lccns = _.uniq(_.values(data.records)[0].lccns)
+          if lccns? and (lccns.length > 0)
             lccn_query(lccn_id) for lccn_id in lccns
+          isbns = _.uniq(_.values(data.records)[0].isbns)
+          if isbns? and (isbns.length > 0)
+            isbn_query(isbn_id) for isbn_id in isbns
 
 process_ht_catalog = (identifier_string) ->
   console.log 'process_ht_catalog'
@@ -190,6 +193,28 @@ ia_url = (ia_id) ->
 process_ia_id = (ia_id, score = 0) ->
   ia_biblio_query(ia_id, score)
   console.log ia_id
+
+isbn_query = (isbn_id, score = 0) ->
+  if isbn_id not in QUERIED_IDS['isbn']
+    console.log "isbn_query: #{isbn_id}"
+    QUERIED_IDS['isbn'].push isbn_id
+    $.ajax "#{GOOGLE_BOOKS_URI}?q=isbn:#{isbn_id}&key=#{GOOGLE_BOOKS_API_KEY}",
+      type: 'GET'
+      cache: true
+      dataType: 'json'
+      crossDomain: true
+      error: (jqXHR, textStatus, errorThrown) ->
+        $('#results').append($('<div/>',{class: 'alert alert-danger', role: 'alert'}).text("Error in Google Books AJAX call for identifier #{gb_id}"))
+        console.log jqXHR
+        console.log errorThrown
+        console.log "AJAX Error: #{textStatus}"
+      success: (data) ->
+        console.log "isbn_query #{isbn_id} result:"
+        console.log data
+        if data and data.items and (data.items.length > 0)
+          for item in data.items
+            process_gb_id(item.id, score)
+            gb_query(item.id)
 
 lccn_query = (lccn_id, score = 0) ->
   if lccn_id not in QUERIED_IDS['lccn']

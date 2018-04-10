@@ -229,7 +229,7 @@ industry_identifier_query = (identifier_type, identifier, score = 0) ->
 
 gb_biblio_query = (gb_id, score = 0) ->
   if $("##{html_id(gb_id)}").length == 0
-    $.ajax "#{GOOGLE_BOOKS_URI}/#{gb_id}?key=#{GOOGLE_BOOKS_API_KEY}",
+    $.ajax "#{GOOGLE_BOOKS_URI}/#{gb_id}?projection=full&key=#{GOOGLE_BOOKS_API_KEY}",
       type: 'GET'
       cache: true
       dataType: 'json'

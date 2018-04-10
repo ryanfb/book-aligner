@@ -43,6 +43,7 @@ fusion_tables_query = (query, callback, error_callback) ->
           console.log "Retrying Fusion Tables query: #{query}"
           fusion_tables_query(query, callback, error_callback)
         success: (data) ->
+          console.log "Fusion Tables result for #{query}:"
           console.log data
           if callback?
             callback(data)
@@ -184,11 +185,11 @@ ia_biblio_query = (ia_id, score = 0) ->
               else
                 industry_identifier_query(identifier_type_mapping[identifier_type], data.metadata[identifier_type])
 
-process_ia = (identifier_string) ->
+process_ia = (identifier_string, score = 100) ->
   console.log 'process_ia'
   match = identifier_string.match(IA_REGEX)
   ia_id = match[2].split('&')[0]
-  process_ia_id(ia_id, 100)
+  process_ia_id(ia_id, score)
   ia_query(ia_id)
 
 ia_query = (ia_id, level = 0) ->
@@ -243,6 +244,24 @@ industry_identifier_query = (identifier_type, identifier, score = 0) ->
         console.log "#{identifier_type} query #{identifier} HathiTrust result:"
         console.log data
         ht_biblio_query(item.htid) for item in _.values(data)[0].items
+    $.ajax "https://openlibrary.org/api/books?bibkeys=#{identifier_type}:#{identifier}&format=json&jscmd=data",
+      type: 'GET'
+      cache: true
+      dataType: 'json'
+      crossDomain: true
+      error: (jqXHR, textStatus, errorThrown) ->
+        $('#results').append($('<div/>',{class: 'alert alert-danger', role: 'alert'}).text('Error in Internet Archive AJAX call.'))
+        console.log errorThrown
+        console.log "AJAX Error: #{textStatus}"
+      success: (data) ->
+        console.log "#{identifier_type} query #{identifier} Internet Archive result:"
+        console.log data
+        if data? and !($.isEmptyObject(data))
+          ebooks = _.values(data)[0].ebooks
+          if ebooks? and (ebooks.length > 0)
+            for ebook in ebooks
+              if ebook.preview_url.match(IA_REGEX)
+                process_ia(ebook.preview_url)
 
 gb_biblio_query = (gb_id, score = 0) ->
   if $("##{html_id(gb_id)}").length == 0

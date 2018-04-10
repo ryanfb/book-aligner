@@ -75,6 +75,9 @@ ht_biblio_query = (ht_id, score = 0) ->
           ]).draw(false)
           $('#table').DataTable().columns.adjust().draw()
           # (Original from #{ht_object.orig})
+          oclcs = _.uniq(_.values(data.records)[0].oclcs)
+          if oclcs? and (oclcs.length > 0)
+            industry_identifier_query('oclc', oclc_id) for oclc_id in oclcs
           lccns = _.uniq(_.values(data.records)[0].lccns)
           if lccns? and (lccns.length > 0)
             industry_identifier_query('lccn', lccn_id) for lccn_id in lccns
@@ -131,7 +134,6 @@ ht_url = (ht_id) ->
 
 oclc_href = (oclc_id) ->
   if oclc_id?
-    industry_identifier_query('oclc', oclc_id)
     "<a target='_blank' href='http://www.worldcat.org/oclc/#{oclc_id}'>#{oclc_id}</a>"
 
 process_ht_id = (ht_id, score = 0) ->
@@ -168,8 +170,17 @@ ia_biblio_query = (ia_id, score = 0) ->
             match = data.metadata.source.match(GB_REGEX)
             gb_id = match[1].split('&')[0]
             process_gb_id(gb_id, score)
-          if data.metadata.lccn?
-            industry_identifier_query('lccn', data.metadata.lccn)
+          identifier_type_mapping = {
+            'lccn': 'lccn',
+            'isbn': 'isbn',
+            'oclc-id': 'oclc'
+          }
+          for identifier_type in ['lccn','isbn','oclc-id']
+            if data.metadata[identifier_type]?
+              if $.isArray(data.metadata[identifier_type])
+                industry_identifier_query(identifier_type_mapping[identifier_type], identifier) for identifier in _.uniq(data.metadata[identifier_type])
+              else
+                industry_identifier_query(identifier_type_mapping[identifier_type], data.metadata[identifier_type])
 
 process_ia = (identifier_string) ->
   console.log 'process_ia'

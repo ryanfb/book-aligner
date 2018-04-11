@@ -353,7 +353,7 @@ process_identifier = (identifier_string) ->
     else $('#results').prepend($('<p/>').text('Unsupported identifier string.'))
 
 find_matches = ->
-  process_identifier($('#identifier_input').val())
+  process_identifier($('#identifier_input').val().trim())
   return false
 
 $(document).ready ->

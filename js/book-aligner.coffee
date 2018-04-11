@@ -77,15 +77,10 @@ ht_biblio_query = (ht_id, score = 0) ->
           ]).draw(false)
           $('#table').DataTable().columns.adjust().draw()
           # (Original from #{ht_object.orig})
-          oclcs = _.uniq(_.values(data.records)[0].oclcs)
-          if oclcs? and (oclcs.length > 0)
-            industry_identifier_query('oclc', oclc_id) for oclc_id in oclcs
-          lccns = _.uniq(_.values(data.records)[0].lccns)
-          if lccns? and (lccns.length > 0)
-            industry_identifier_query('lccn', lccn_id) for lccn_id in lccns
-          isbns = _.uniq(_.values(data.records)[0].isbns)
-          if isbns? and (isbns.length > 0)
-            industry_identifier_query('isbn', isbn_id) for isbn_id in isbns
+          for identifier_type in ['oclc','lccn','isbn']
+            identifiers = _.uniq(_.values(data.records)[0]["#{identifier_type}s"])
+            if identifiers? and (identifiers.length > 0)
+              industry_identifier_query(identifier_type, identifier) for identifier in identifiers
 
 process_ht_catalog = (identifier_string) ->
   console.log 'process_ht_catalog'

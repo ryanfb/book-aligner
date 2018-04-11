@@ -48,6 +48,12 @@ fusion_tables_query = (query, callback, error_callback) ->
           if callback?
             callback(data)
 
+ht_rights = (usRightsString) ->
+  if usRightsString? and (usRightsString.toLowerCase() == 'full view')
+    return ''
+  else
+    return " \uD83D\uDD12"
+
 ht_biblio_query = (ht_id, score = 0) ->
   if $("##{html_id(ht_id)}").length == 0
     console.log "Adding HT: #{ht_id}"
@@ -69,7 +75,7 @@ ht_biblio_query = (ht_id, score = 0) ->
         if $("##{html_id(ht_id)}").length == 0
           $('#table').DataTable().row.add([
             '<img src="https://www.hathitrust.org/favicon.ico" width="16" height="16"/>',
-            "<a id='#{html_id(ht_id)}' href='#{ht_url(ht_id)}' target='_blank'>#{ht_id}</a>",
+            "<a id='#{html_id(ht_id)}' href='#{ht_url(ht_id)}' target='_blank'>#{ht_id}</a>" + ht_rights(data.items[0]['usRightsString']),
             _.values(data.records)[0].titles[0],
             _.values(data.records)[0].publishDates[0],
             ht_object.enumcron || '',
@@ -266,6 +272,12 @@ industry_identifier_query = (identifier_type, identifier, score = 0) ->
               if ebook.preview_url.match(IA_REGEX)
                 process_ia(ebook.preview_url)
 
+gb_rights = (accessViewStatus) ->
+  if accessViewStatus? and (accessViewStatus == 'FULL_PUBLIC_DOMAIN')
+    return ''
+  else
+    return " \uD83D\uDD12"
+
 gb_biblio_query = (gb_id, score = 0) ->
   if $("##{html_id(gb_id)}").length == 0
     console.log("Adding GB: #{gb_id}")
@@ -286,7 +298,7 @@ gb_biblio_query = (gb_id, score = 0) ->
         if $("##{html_id(gb_id)}").length == 0
           $('#table').DataTable().row.add([
             '<img src="http://www.google.com/favicon.ico" width="16" height="16"/>',
-            "<a id='#{html_id(gb_id)}' href='#{gb_url(gb_id)}' target='_blank'>#{gb_id}</a>",
+            "<a id='#{html_id(gb_id)}' href='#{gb_url(gb_id)}' target='_blank'>#{gb_id}</a>" + gb_rights(data.accessInfo.accessViewStatus),
             data.volumeInfo.title,
             data.volumeInfo.publishedDate,
             '',

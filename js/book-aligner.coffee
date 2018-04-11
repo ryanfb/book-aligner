@@ -50,6 +50,7 @@ fusion_tables_query = (query, callback, error_callback) ->
 
 ht_biblio_query = (ht_id, score = 0) ->
   if $("##{html_id(ht_id)}").length == 0
+    console.log "Adding HT: #{ht_id}"
     ht_query(ht_id)
     $.ajax "https://catalog.hathitrust.org/api/volumes/brief/htid/#{ht_id}.json",
       type: 'GET'
@@ -61,6 +62,7 @@ ht_biblio_query = (ht_id, score = 0) ->
         console.log errorThrown
         console.log "AJAX Error: #{textStatus}"
       success: (data) ->
+        console.log("HT metadata for #{ht_id}:")
         console.log data
         ht_object = _.filter(data.items, (item) -> item.htid == ht_id)[0]
         console.log(ht_object)
@@ -134,7 +136,6 @@ oclc_href = (oclc_id) ->
 
 process_ht_id = (ht_id, score = 0) ->
   ht_biblio_query(ht_id, score)
-  console.log ht_id
 
 filter_ia_external_ids = (external_ids, type) ->
   identifier_regex = new RegExp("^urn:#{type}:(.+)$")
@@ -143,6 +144,7 @@ filter_ia_external_ids = (external_ids, type) ->
 
 ia_biblio_query = (ia_id, score = 0) ->
   if $("##{html_id(ia_id)}").length == 0
+    console.log("Adding IA: #{ia_id}")
     ia_query(ia_id)
     $.ajax "https://archive.org/metadata/#{ia_id}",
       type: 'GET'
@@ -154,6 +156,7 @@ ia_biblio_query = (ia_id, score = 0) ->
         console.log errorThrown
         console.log "AJAX Error: #{textStatus}"
       success: (data) ->
+        console.log "IA metadata for #{ia_id}:"
         console.log data
         if $("##{html_id(ia_id)}").length == 0
           $('#table').DataTable().row.add([
@@ -210,7 +213,6 @@ ia_url = (ia_id) ->
 
 process_ia_id = (ia_id, score = 0) ->
   ia_biblio_query(ia_id, score)
-  console.log ia_id
 
 industry_identifier_query = (identifier_type, identifier, score = 0) ->
   if identifier not in QUERIED_IDS[identifier_type]
@@ -266,6 +268,7 @@ industry_identifier_query = (identifier_type, identifier, score = 0) ->
 
 gb_biblio_query = (gb_id, score = 0) ->
   if $("##{html_id(gb_id)}").length == 0
+    console.log("Adding GB: #{gb_id}")
     gb_query(gb_id)
     $.ajax "#{GOOGLE_BOOKS_URI}/#{gb_id}?projection=full&key=#{GOOGLE_BOOKS_API_KEY}",
       type: 'GET'
@@ -278,6 +281,7 @@ gb_biblio_query = (gb_id, score = 0) ->
         console.log errorThrown
         console.log "AJAX Error: #{textStatus}"
       success: (data) ->
+        console.log("GB metadata for #{gb_id}:")
         console.log data
         if $("##{html_id(gb_id)}").length == 0
           $('#table').DataTable().row.add([
@@ -317,7 +321,6 @@ gb_url = (gb_id) ->
 
 process_gb_id = (gb_id, score = 0) ->
   gb_biblio_query(gb_id, score)
-  console.log gb_id
 
 reset_queried_ids = ->
   QUERIED_IDS = {

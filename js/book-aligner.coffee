@@ -136,6 +136,11 @@ process_ht_id = (ht_id, score = 0) ->
   ht_biblio_query(ht_id, score)
   console.log ht_id
 
+filter_ia_external_ids = (external_ids, type) ->
+  identifier_regex = new RegExp("^urn:#{type}:(.+)$")
+  matching_ids = external_ids.filter (external_id) -> external_id.match(identifier_regex)
+  matching_id.match(identifier_regex)[1] for matching_id in matching_ids
+
 ia_biblio_query = (ia_id, score = 0) ->
   if $("##{html_id(ia_id)}").length == 0
     ia_query(ia_id)
@@ -173,11 +178,15 @@ ia_biblio_query = (ia_id, score = 0) ->
             'oclc-id': 'oclc'
           }
           for identifier_type in ['lccn','isbn','oclc-id']
+            queriable_identifiers = []
+            if $.isArray(data.metadata['related-external-id'])
+              queriable_identifiers = queriable_identifiers.concat(filter_ia_external_ids(data.metadata['related-external-id'],identifier_type_mapping[identifier_type]))
             if data.metadata[identifier_type]?
               if $.isArray(data.metadata[identifier_type])
-                industry_identifier_query(identifier_type_mapping[identifier_type], identifier) for identifier in _.uniq(data.metadata[identifier_type])
+                queriable_identifiers = queriable_identifiers.concat(data.metadata[identifier_type])
               else
-                industry_identifier_query(identifier_type_mapping[identifier_type], data.metadata[identifier_type])
+                queriable_identifiers.push(data.metadata[identifier_type])
+            industry_identifier_query(identifier_type_mapping[identifier_type], identifier) for identifier in _.uniq(queriable_identifiers)
 
 process_ia = (identifier_string, score = 100) ->
   console.log 'process_ia'
@@ -284,7 +293,7 @@ gb_biblio_query = (gb_id, score = 0) ->
           $('#table').DataTable().columns.adjust().draw()
           if data.volumeInfo.industryIdentifiers? and (data.volumeInfo.industryIdentifiers.length > 0)
             for industry_identifier in data.volumeInfo.industryIdentifiers
-              if industry_identifier.type == 'ISBN_13'
+              if (industry_identifier.type == 'ISBN_13') or (industry_identifier.type == 'ISBN_10')
                 industry_identifier_query('isbn', industry_identifier.identifier)
 
 process_gb = (identifier_string) ->

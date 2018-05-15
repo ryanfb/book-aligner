@@ -76,12 +76,12 @@ ht_biblio_query = (ht_id, score = 0) ->
           $('#table').DataTable().row.add([
             '<img src="https://www.hathitrust.org/favicon.ico" width="16" height="16"/>',
             "<a id='#{html_id(ht_id)}' href='#{ht_url(ht_id)}' target='_blank'>#{ht_id}</a>" + ht_rights(data.items[0]['usRightsString']),
-            _.values(data.records)[0].titles[0],
-            _.values(data.records)[0].publishDates[0],
+            _.values(data.records)[0].titles[0] || '',
+            _.values(data.records)[0].publishDates[0] || '',
             ht_object.enumcron || '',
             '',
             oclc_href(_.values(data.records)[0].oclcs[0]) || '',
-            score
+            score || ''
           ]).draw(false)
           $('#table').DataTable().columns.adjust().draw()
           # (Original from #{ht_object.orig})
@@ -173,7 +173,7 @@ ia_biblio_query = (ia_id, score = 0) ->
             data.metadata.volume || '',
             data.metadata.imagecount || '',
             oclc_href(data.metadata['oclc-id']) || '',
-            score
+            score || ''
           ]).draw(false)
           $('#table').DataTable().columns.adjust().draw()
 
@@ -299,12 +299,12 @@ gb_biblio_query = (gb_id, score = 0) ->
           $('#table').DataTable().row.add([
             '<img src="http://www.google.com/favicon.ico" width="16" height="16"/>',
             "<a id='#{html_id(gb_id)}' href='#{gb_url(gb_id)}' target='_blank'>#{gb_id}</a>" + gb_rights(data.accessInfo.accessViewStatus),
-            data.volumeInfo.title,
-            data.volumeInfo.publishedDate,
+            data.volumeInfo.title || '',
+            data.volumeInfo.publishedDate || '',
             '',
             data.volumeInfo.printedPageCount || data.volumeInfo.pageCount || '',
             '',
-            score
+            score || ''
           ]).draw(false)
           $('#table').DataTable().columns.adjust().draw()
           if data.volumeInfo.industryIdentifiers? and (data.volumeInfo.industryIdentifiers.length > 0)

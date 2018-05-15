@@ -81,7 +81,7 @@ ht_biblio_query = (ht_id, score = 0) ->
             ht_object.enumcron || '',
             '',
             oclc_href(_.values(data.records)[0].oclcs[0]) || '',
-            score || ''
+            score || 0
           ]).draw(false)
           $('#table').DataTable().columns.adjust().draw()
           # (Original from #{ht_object.orig})
@@ -173,7 +173,7 @@ ia_biblio_query = (ia_id, score = 0) ->
             data.metadata.volume || '',
             data.metadata.imagecount || '',
             oclc_href(data.metadata['oclc-id']) || '',
-            score || ''
+            score || 0
           ]).draw(false)
           $('#table').DataTable().columns.adjust().draw()
 
@@ -304,7 +304,7 @@ gb_biblio_query = (gb_id, score = 0) ->
             '',
             data.volumeInfo.printedPageCount || data.volumeInfo.pageCount || '',
             '',
-            score || ''
+            score || 0
           ]).draw(false)
           $('#table').DataTable().columns.adjust().draw()
           if data.volumeInfo.industryIdentifiers? and (data.volumeInfo.industryIdentifiers.length > 0)

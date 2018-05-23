@@ -12,7 +12,7 @@ HT_IA_TABLE_IDS = ['1Y5uDWMjUzrk6z_8l_C1NzLq9yUSpgS5n473N9dXL','1JNR9hJogOdwsYrN
 IA_GB_TABLE_ID = '1Tg0cm8gXBUwsBGx53GwGhHYiPpt_6YzG-HrR6Ywl'
 
 HT_REGEX = /^https?:\/\/babel\.hathitrust\.org\/cgi\/pt\?id=(.+)/
-IA_REGEX = /^https?:\/\/(www\.)?archive\.org\/details\/(.+)\/?/
+IA_REGEX = /^https?:\/\/(www\.)?archive\.org\/(details|stream)\/(.+)[#/]?/
 GB_REGEX = /^https?:\/\/books\.google\.com\/books\?id=(.+)/
 HDL_REGEX = /^https?:\/\/hdl\.handle\.net\/2027\/(.+)\/?/
 HT_CATALOG_REGEX = /^https?:\/\/catalog\.hathitrust\.org\/Record\/(\d{9})/
@@ -200,7 +200,7 @@ ia_biblio_query = (ia_id, score = 0) ->
 process_ia = (identifier_string, score = 100) ->
   console.log 'process_ia'
   match = identifier_string.match(IA_REGEX)
-  ia_id = match[2].split('&')[0]
+  ia_id = match[3].split(/[&#]/)[0]
   process_ia_id(ia_id, score)
 
 ia_query = (ia_id, level = 0) ->

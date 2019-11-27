@@ -143,7 +143,7 @@ ia_biblio_query = (ia_id, score = 0) ->
         # console.log data
         if $("##{html_id(ia_id)}").length == 0
           $('#table').DataTable().row.add([
-            '<img src="http://archive.org/favicon.ico" width="16" height="16"/>',
+            '<img src="https://archive.org/favicon.ico" width="16" height="16"/>',
             "<a id='#{html_id(ia_id)}' href='#{ia_url(ia_id)}' target='_blank'>#{ia_id}</a>",
             data.metadata.title,
             data.metadata.year || data.metadata.date || '',
@@ -303,7 +303,7 @@ gb_biblio_query = (gb_id, score = 0) ->
         # console.log data
         if $("##{html_id(gb_id)}").length == 0
           $('#table').DataTable().row.add([
-            '<img src="http://www.google.com/favicon.ico" width="16" height="16"/>',
+            '<img src="https://www.google.com/favicon.ico" width="16" height="16"/>',
             "<a id='#{html_id(gb_id)}' href='#{gb_url(gb_id)}' target='_blank'>#{gb_id}</a>" + gb_rights(data.accessInfo.accessViewStatus),
             data.volumeInfo.title || '',
             data.volumeInfo.publishedDate || '',

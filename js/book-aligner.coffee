@@ -44,8 +44,8 @@ ht_biblio_query = (ht_id, score = 0) ->
         # console.log(ht_object)
         if $("##{html_id(ht_id)}").length == 0
           $('#table').DataTable().row.add([
-            '<img src="https://www.hathitrust.org/favicon.ico" width="16" height="16"/>',
             "<a id='#{html_id(ht_id)}' href='#{ht_url(ht_id)}' target='_blank'>#{ht_id}</a>" + ht_rights(data.items[0]['usRightsString']),
+            '<img src="https://www.hathitrust.org/favicon.ico" width="16" height="16"/>',
             _.values(data.records)[0].titles[0] || '',
             _.values(data.records)[0].publishDates[0] || '',
             ht_object.enumcron || '',
@@ -143,8 +143,8 @@ ia_biblio_query = (ia_id, score = 0) ->
         # console.log data
         if $("##{html_id(ia_id)}").length == 0
           $('#table').DataTable().row.add([
-            '<img src="https://archive.org/favicon.ico" width="16" height="16"/>',
             "<a id='#{html_id(ia_id)}' href='#{ia_url(ia_id)}' target='_blank'>#{ia_id}</a>",
+            '<img src="https://archive.org/favicon.ico" width="16" height="16"/>',
             data.metadata.title,
             data.metadata.year || data.metadata.date || '',
             data.metadata.volume || '',
@@ -303,8 +303,8 @@ gb_biblio_query = (gb_id, score = 0) ->
         # console.log data
         if $("##{html_id(gb_id)}").length == 0
           $('#table').DataTable().row.add([
-            '<img src="https://www.google.com/favicon.ico" width="16" height="16"/>',
             "<a id='#{html_id(gb_id)}' href='#{gb_url(gb_id)}' target='_blank'>#{gb_id}</a>" + gb_rights(data.accessInfo.accessViewStatus),
+            '<img src="https://www.google.com/intl/en/googlebooks/images/gbs_preview_sticker1.gif"/>',
             data.volumeInfo.title || '',
             data.volumeInfo.publishedDate || '',
             '',
@@ -367,8 +367,8 @@ process_identifier = (identifier_string) ->
     autoWidth: true
     order: [[ 7, "desc" ]]
     columns: [
-      { title: "", orderable: false }
       { title: "Identifier" }
+      { title: "", orderable: false }
       { title: "Title" }
       { title: "Year" }
       { title: "Volume" }

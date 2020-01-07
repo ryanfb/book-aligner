@@ -9,7 +9,7 @@ GOOGLE_BOOKS_API_KEY = 'AIzaSyDkGJOl5EEBahhn1J2kS70FmiRR2uwpFIY'
 
 HT_REGEX = /^https?:\/\/babel\.hathitrust\.org\/cgi\/pt\?id=(.+)/
 IA_REGEX = /^https?:\/\/(www\.)?archive\.org\/(details|stream)\/(.+)[#/]?/
-GB_REGEX = /^https?:\/\/(books|www)\.google\.com\/books(\?id=|\/edition\/.+\/)([^?&]+)([?&].*)?/
+GB_REGEX = /^https?:\/\/(books|www|play)\.google\.com\/(store\/)?books(\?id=|\/details\?id=|\/edition\/.+\/)([^?&]+)([?&].*)?/
 HDL_REGEX = /^https?:\/\/hdl\.handle\.net\/2027\/(.+)\/?/
 HT_CATALOG_REGEX = /^https?:\/\/catalog\.hathitrust\.org\/Record\/(\d{9})/
 
@@ -156,7 +156,7 @@ ia_biblio_query = (ia_id, score = 0) ->
 
           if data.metadata.source? && data.metadata.source.match(GB_REGEX)
             match = data.metadata.source.match(GB_REGEX)
-            gb_id = match[3]
+            gb_id = match[4]
             process_gb_id(gb_id, score)
           identifier_type_mapping = {
             'lccn': 'lccn',
@@ -321,7 +321,7 @@ gb_biblio_query = (gb_id, score = 0) ->
 process_gb = (identifier_string) ->
   console.log 'process_gb'
   match = identifier_string.match(GB_REGEX)
-  gb_id = match[3]
+  gb_id = match[4]
   process_gb_id(gb_id, 100)
 
 gb_query = (gb_id, level = 0) ->

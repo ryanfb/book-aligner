@@ -19,6 +19,15 @@
     <script src="//cdn.datatables.net/1.10.11/js/dataTables.bootstrap.min.js"></script>
     <!-- Book Aligner -->
     <script src="js/book-aligner.js"></script>
+    <style type="text/css">
+      pre, .wrapped, code {
+        width: 99%;
+        white-space: pre-wrap;      /* CSS 2.1 */
+        word-wrap: break-word;      /* IE 5+ */
+        word-break: break-all
+        line-break: anywhere;
+      }
+    </style>
     <title>Book Aligner</title>
   </head>
   <body>
@@ -30,14 +39,14 @@
       </div>
       <div class="row">
         <form id="identifier_form">
-          <div class="col-xs-6 col-md-8">
+          <div class="col-xs-7 col-md-10">
             <input type="text" id="identifier_input" name="identifier" style="width:100%">
           </div>
-          <div class="col-xs-4 col-md-2">
+          <div class="col-xs-5 col-md-2">
             <input type="submit" value="Search Books" style="width:100%">
           </div>
           <div class="col-xs-2 col-md-2">
-            <img src="https://books.google.com/googlebooks/images/poweredby.png">
+            <img src="https://books.google.com/googlebooks/images/poweredby.png" style="padding-top: 1em;">
           </div>
         </form>
       </div>

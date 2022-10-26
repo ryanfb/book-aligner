@@ -31,19 +31,17 @@
   <body>
     <div class="container">
       <div class="page-header">
-        <a href="https://github.com/ryanfb/book-aligner/" role="button" class="btn btn-primary" style="float:right" target="_blank">View on GitHub</a>
+        <a href="https://github.com/ryanfb/book-aligner/" role="button" class="btn btn-primary pt-3" style="float:right" target="_blank">View on GitHub</a>
         <h1><a href=".">Book Aligner</a></h1>
         <p>Find matching books for a given HathiTrust, Internet Archive, or Google Books URL.</p>
       </div>
       <div class="row">
         <form id="identifier_form">
-          <div class="col-xs-7 col-md-10">
-            <input type="text" id="identifier_input" name="identifier" style="width:100%">
+          <div class="col-10 input-group mx-auto">
+            <input class="form-control" type="text" id="identifier_input" name="identifier">
+            <input class="btn btn-primary" type="submit" value="Search Books">
           </div>
-          <div class="col-xs-5 col-md-2">
-            <input type="submit" value="Search Books" style="width:100%">
-          </div>
-          <div class="col-xs-2 col-md-2">
+          <div class="col-2">
             <img src="https://books.google.com/googlebooks/images/poweredby.png" style="padding-top: 1em;">
           </div>
         </form>
